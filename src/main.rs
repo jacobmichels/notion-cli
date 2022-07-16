@@ -1,6 +1,6 @@
 #![allow(clippy::needless_return)]
 
-use std::{fmt::Display, str::FromStr};
+use std::fmt::Display;
 
 use clap::{ArgGroup, Parser, Subcommand};
 
@@ -37,8 +37,8 @@ fn handle_command(cli: &Cli) {
 
                     println!("List subcommand called: status = {}", status);
                 }
-                TaskSubcommands::Done => {
-                    println!("Done subcommand called")
+                TaskSubcommands::Done { id } => {
+                    println!("Done subcommand called: id = {:?}", id)
                 }
                 TaskSubcommands::Update { id, to, name } => {
                     let new_name = match name {
@@ -106,7 +106,10 @@ enum TaskSubcommands {
         #[clap(long, short)]
         name: Option<String>,
     },
-    Done,
+    Done {
+        #[clap(required = true)]
+        id: Vec<String>, // use a vec so we can take in multiple ids
+    },
 }
 
 #[derive(clap::ValueEnum, Clone)]
