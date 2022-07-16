@@ -7,6 +7,10 @@ use clap::{ArgGroup, Parser, Subcommand};
 fn main() {
     let cli = Cli::parse();
 
+    // create handler objects, pass them to handle_command
+    // try to use traits
+    // do the sbominator pattern, instantiate stuff then pass it down for testability
+
     handle_command(&cli);
 }
 
@@ -84,20 +88,20 @@ enum Commands {
 #[derive(Subcommand)]
 enum TaskSubcommands {
     List {
-        #[clap(long, short)]
+        #[clap(long, short, value_enum)]
         status: Option<TaskStatus>,
     },
     Add {
         #[clap(required = true)]
         name: Vec<String>, // use a vec so we can have spaces in the title without wrapping with quotes
-        #[clap(long, short)]
+        #[clap(long, short, value_enum)]
         status: TaskStatus,
     },
     #[clap(group(ArgGroup::new("update").required(true).multiple(true).args(&["to", "name"])))]
     Update {
         #[clap(required = true)]
         id: Vec<String>, // use a vec so we can take in multiple ids
-        #[clap(long, short)]
+        #[clap(long, short, value_enum)]
         to: Option<TaskStatus>,
         #[clap(long, short)]
         name: Option<String>,
@@ -105,26 +109,11 @@ enum TaskSubcommands {
     Done,
 }
 
-// #[derive(Debug)]
+#[derive(clap::ValueEnum, Clone)]
 enum TaskStatus {
     Todo,
     Doing,
     Done,
-}
-
-impl FromStr for TaskStatus {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        return match s {
-            "todo" => Ok(TaskStatus::Todo),
-            "doing" => Ok(TaskStatus::Doing),
-            "done" => Ok(TaskStatus::Done),
-            _ => Err(anyhow::Error::msg(
-                "Status must be on of: [todo, doing, done]",
-            )),
-        };
-    }
 }
 
 impl Display for TaskStatus {
