@@ -6,7 +6,9 @@ use cli::Cli;
 mod cli;
 mod handlers;
 
-fn main() {
+// single threaded async runtime, we don't need any worker threads here
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
     let cli = Cli::parse();
 
     let task_handler = handlers::task::Task {};
