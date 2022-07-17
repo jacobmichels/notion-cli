@@ -1,6 +1,14 @@
 use crate::cli::{TaskHandler, TaskStatus};
+use async_trait::async_trait;
 
-pub struct Task {}
+#[async_trait]
+pub trait NotionCaller {
+    async fn list_databases(&self) -> Vec<String>;
+}
+
+pub struct Task {
+    pub notion: Box<dyn NotionCaller>,
+}
 
 impl TaskHandler for Task {
     fn add(&self, name: &[String], status: &TaskStatus) {
@@ -14,14 +22,7 @@ impl TaskHandler for Task {
         );
     }
 
-    fn list(&self, status: &Option<TaskStatus>) {
-        let status = match status {
-            Some(status) => status.to_string(),
-            None => String::from("all"),
-        };
-
-        println!("List subcommand called: status = {}", status);
-    }
+    fn list(&self, status: &Option<TaskStatus>) {}
 
     fn done(&self, ids: &[String]) {
         println!("Done subcommand called: id = {:?}", ids)
