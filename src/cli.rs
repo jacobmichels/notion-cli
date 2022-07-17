@@ -17,18 +17,20 @@ pub struct Handlers {
     pub init: Box<dyn InitHandler>,
 }
 
-pub fn handle_command(cli: &Cli, handlers: &Handlers) {
-    match &cli.command {
-        Commands::Tasks { subcommand } => {
-            println!("Tasks command called");
-            match subcommand {
-                TaskSubcommands::Add { name, status } => handlers.task.add(name, status),
-                TaskSubcommands::List { status } => handlers.task.list(status),
-                TaskSubcommands::Done { id } => handlers.task.done(id),
-                TaskSubcommands::Update { id, to, name } => handlers.task.update(id, to, name),
+impl Cli {
+    pub fn handle_command(&self, handlers: &Handlers) {
+        match &self.command {
+            Commands::Tasks { subcommand } => {
+                println!("Tasks command called");
+                match subcommand {
+                    TaskSubcommands::Add { name, status } => handlers.task.add(name, status),
+                    TaskSubcommands::List { status } => handlers.task.list(status),
+                    TaskSubcommands::Done { id } => handlers.task.done(id),
+                    TaskSubcommands::Update { id, to, name } => handlers.task.update(id, to, name),
+                }
             }
+            Commands::Init => handlers.init.init(),
         }
-        Commands::Init => handlers.init.init(),
     }
 }
 

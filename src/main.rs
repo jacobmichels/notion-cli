@@ -19,5 +19,5 @@ async fn main() {
         task: Box::new(task_handler),
     };
 
-    cli::handle_command(&cli, &handlers);
+    cli.handle_command(&handlers);
 }
