@@ -1,15 +1,19 @@
 use std::{
-    fmt::write,
     fs::{self, File},
     io::Write,
-    path::{self, PathBuf},
 };
 
 use crate::cli::InitHandler;
 
-pub struct Init {}
+pub struct PersistantInitHandler {}
 
-impl InitHandler for Init {
+impl PersistantInitHandler {
+    pub fn new() -> PersistantInitHandler {
+        return PersistantInitHandler {};
+    }
+}
+
+impl InitHandler for PersistantInitHandler {
     // creates a config file ~/.notion-cli/config.json and populates it with the database_id to use
     // maybe should be refactored eventually for testability and to optionally use a wizard to find the correct db
     fn init(&self, database_id: &String) -> anyhow::Result<()> {

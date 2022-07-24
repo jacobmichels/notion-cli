@@ -11,16 +11,17 @@ pub struct Notion {
 }
 
 impl Notion {
-    pub fn new(base_url: String, token: String) -> Result<Notion, anyhow::Error> {
+    pub fn new(base_url: String, token: String) -> Notion {
         let client = reqwest::blocking::ClientBuilder::new()
             .https_only(true)
-            .build()?;
+            .build()
+            .expect("http client configuration failed");
 
-        return Ok(Notion {
+        return Notion {
             base_url,
             client,
             token,
-        });
+        };
     }
 
     fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error> {

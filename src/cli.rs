@@ -30,6 +30,10 @@ impl Cli {
             Commands::Tasks { subcommand } => {
                 println!("Tasks command called");
 
+                if !self.is_initialized() {
+                    return Err(anyhow::Error::msg("App not initialized, please run init"));
+                }
+
                 match subcommand {
                     TaskSubcommands::Add { name, status } => handlers.task.add(name, status)?,
                     TaskSubcommands::List { status } => {
@@ -50,8 +54,8 @@ impl Cli {
     }
 
     // function to ensure the app has been initialized with the init command
-    fn is_initialized() -> bool {
-        true
+    fn is_initialized(&self) -> bool {
+        return true;
     }
 }
 

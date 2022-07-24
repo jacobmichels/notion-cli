@@ -1,6 +1,9 @@
 use anyhow::Ok;
 
-use crate::cli::{TaskHandler, TaskStatus};
+use crate::{
+    api::Notion,
+    cli::{TaskHandler, TaskStatus},
+};
 
 pub struct Task {
     pub id: String,
@@ -21,6 +24,14 @@ pub trait NotionCaller {
 
 pub struct NotionTaskHandler {
     pub notion: Box<dyn NotionCaller>,
+}
+
+impl NotionTaskHandler {
+    pub fn new(notion: Notion) -> NotionTaskHandler {
+        return NotionTaskHandler {
+            notion: Box::new(notion),
+        };
+    }
 }
 
 impl TaskHandler for NotionTaskHandler {
