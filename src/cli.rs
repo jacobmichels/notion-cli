@@ -44,7 +44,7 @@ impl Cli {
                 return Ok(());
             }
             Commands::Init { database_id } => handlers.init.init(database_id),
-        }
+        }?;
 
         return Ok(());
     }
