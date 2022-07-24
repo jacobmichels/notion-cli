@@ -20,18 +20,21 @@ pub trait TaskHandler {
     ) -> Result<(), anyhow::Error>;
 }
 
-/// Defines the init operation
-pub trait InitHandler {
+/// Defines the config operations
+pub trait ConfigHandler {
     /// Saves the database_id for use in future calls
-    fn init(&self, database_id: &str) -> anyhow::Result<()>;
+    fn set_database(&self, database_id: &str) -> anyhow::Result<()>;
+
+    /// Gets the persisted database_id
+    fn get_database_id(&self) -> anyhow::Result<String>;
 }
 
 /// Struct containing all required handlers
 pub struct Handlers {
     /// Task handler
     pub task: Box<dyn TaskHandler>,
-    /// Init handler
-    pub init: Box<dyn InitHandler>,
+    /// Config handler
+    pub config: Box<dyn ConfigHandler>,
 }
 
 impl Cli {
@@ -42,7 +45,9 @@ impl Cli {
                 println!("Tasks command called");
 
                 if !self.is_initialized() {
-                    return Err(anyhow::Error::msg("App not initialized, please run init"));
+                    return Err(anyhow::Error::msg(
+                        "App not initialized, please run config set",
+                    ));
                 }
 
                 match subcommand {
@@ -58,8 +63,19 @@ impl Cli {
 
                 return Ok(());
             }
-            Commands::Init { database_id } => handlers.init.init(database_id),
-        }?;
+            Commands::Config { subcommand } => {
+                println!("Config command called");
+                match subcommand {
+                    ConfigSubcommands::Get => {
+                        let id = handlers.config.get_database_id()?;
+                        println!("Database ID: {}", id);
+                    }
+                    ConfigSubcommands::Set { database_id } => {
+                        handlers.config.set_database(database_id)?
+                    }
+                }
+            }
+        };
 
         return Ok(());
     }
@@ -94,11 +110,11 @@ enum Commands {
         #[clap(subcommand)]
         subcommand: TaskSubcommands,
     },
-    /// Used to set the database task commands interact with
-    Init {
-        /// Notion database_id to use with task commands
-        #[clap(required = true)]
-        database_id: String,
+    /// Used to configure the database task commands interact with
+    Config {
+        /// Config operation to perform
+        #[clap(subcommand)]
+        subcommand: ConfigSubcommands,
     },
 }
 
@@ -139,6 +155,19 @@ enum TaskSubcommands {
         /// The list of tasks to mark as done
         #[clap(required = true)]
         id: Vec<String>,
+    },
+}
+
+/// Defines the config commands that can be performed
+#[derive(Subcommand)]
+enum ConfigSubcommands {
+    /// Gets the current database_id
+    Get,
+    /// Sets the database_id
+    Set {
+        /// The database id in question
+        #[clap(required = true)]
+        database_id: String,
     },
 }
 

@@ -10,7 +10,7 @@ use std::env;
 use api::Notion;
 use clap::Parser;
 use cli::Cli;
-use handlers::{init::JSONInitHandler, task::NotionTaskHandler};
+use handlers::{config::JSONConfigHandler, task::NotionTaskHandler};
 
 /// Defines types needed for talking to the Notion API
 mod api;
@@ -28,10 +28,10 @@ fn main() -> Result<(), anyhow::Error> {
     );
 
     let task_handler = NotionTaskHandler::new(notion_api);
-    let init_handler = JSONInitHandler::new();
+    let config_handler = JSONConfigHandler::new();
 
     let handlers = cli::Handlers {
-        init: Box::new(init_handler),
+        config: Box::new(config_handler),
         task: Box::new(task_handler),
     };
 
