@@ -2,10 +2,15 @@ use clap::{ArgGroup, Parser, Subcommand};
 use std::fmt::Display;
 
 pub trait TaskHandler {
-    fn add(&self, name: &[String], status: &TaskStatus);
-    fn list(&self, status: &Option<TaskStatus>);
-    fn done(&self, ids: &[String]);
-    fn update(&self, ids: &[String], to: &Option<TaskStatus>, name: &Option<String>);
+    fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
+    fn list(&self, status: &Option<TaskStatus>) -> Result<(), anyhow::Error>;
+    fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
+    fn update(
+        &self,
+        ids: &[String],
+        to: &Option<TaskStatus>,
+        name: &Option<String>,
+    ) -> Result<(), anyhow::Error>;
 }
 
 pub trait InitHandler {
@@ -18,19 +23,23 @@ pub struct Handlers {
 }
 
 impl Cli {
-    pub fn handle_command(&self, handlers: &Handlers) {
+    pub fn handle_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
         match &self.command {
             Commands::Tasks { subcommand } => {
                 println!("Tasks command called");
                 match subcommand {
-                    TaskSubcommands::Add { name, status } => handlers.task.add(name, status),
-                    TaskSubcommands::List { status } => handlers.task.list(status),
-                    TaskSubcommands::Done { id } => handlers.task.done(id),
-                    TaskSubcommands::Update { id, to, name } => handlers.task.update(id, to, name),
+                    TaskSubcommands::Add { name, status } => handlers.task.add(name, status)?,
+                    TaskSubcommands::List { status } => handlers.task.list(status)?,
+                    TaskSubcommands::Done { id } => handlers.task.done(id)?,
+                    TaskSubcommands::Update { id, to, name } => {
+                        handlers.task.update(id, to, name)?
+                    }
                 }
             }
             Commands::Init => handlers.init.init(),
         }
+
+        return Ok(());
     }
 }
 

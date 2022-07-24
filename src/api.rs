@@ -1,16 +1,20 @@
-use async_trait::async_trait;
+use anyhow::Ok;
+use reqwest::blocking::Client;
+use serde::Deserialize;
 
 use crate::handlers::task::NotionCaller;
 
 pub struct Notion {
     base_url: String,
     token: String,
-    client: reqwest::Client,
+    client: Client,
 }
 
 impl Notion {
     pub fn new(base_url: String, token: String) -> Result<Notion, anyhow::Error> {
-        let client = reqwest::ClientBuilder::new().https_only(true).build()?;
+        let client = reqwest::blocking::ClientBuilder::new()
+            .https_only(true)
+            .build()?;
 
         return Ok(Notion {
             base_url,
@@ -20,14 +24,64 @@ impl Notion {
     }
 }
 
-#[async_trait]
+#[derive(Deserialize, Debug)]
+struct SearchResponse {
+    object: String,
+    results: Vec<SearchResponseObject>,
+}
+
+#[derive(Deserialize, Debug)]
+struct SearchResponseObject {
+    object: String,
+    id: String,
+}
+
+impl From<&SearchResponseObject> for String {
+    fn from(obj: &SearchResponseObject) -> Self {
+        return obj.id.to_string();
+    }
+}
+
 impl NotionCaller for Notion {
-    async fn list_databases(&self) -> Vec<String> {
+    fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error> {
         let res = self
             .client
             .post(format!("{}/{}", self.base_url, "v1/search"))
-            .bearer_auth(self.token)
-            .send()
-            .await;
+            .header("Accept", "application/json")
+            .header("Notion-Version", "2022-06-28")
+            .header("Content-Type", "application/json")
+            .bearer_auth(&self.token)
+            .send()?;
+
+        let json = res.json::<SearchResponse>()?;
+
+        if json.object != "list" {
+            return Err(anyhow::Error::msg(format!(
+                "format type is \"{}\" when it needs to be \"list\"",
+                json.object
+            )));
+        }
+
+        let mut databases = Vec::new();
+
+        for obj in json.results {
+            if obj.object == "database" {
+                databases.push(obj)
+            }
+        }
+
+        return Ok(databases
+            .iter()
+            .map(|db| {
+                return db.into();
+            })
+            .collect());
     }
+
+    fn list_tasks_in_db(
+        &self,
+        database_id: String,
+    ) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
+        self.client.
+       }
 }

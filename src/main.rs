@@ -1,4 +1,6 @@
 #![allow(clippy::needless_return)]
+#![warn(clippy::implicit_return)]
+use std::env;
 
 use api::Notion;
 use clap::Parser;
@@ -8,15 +10,13 @@ mod api;
 mod cli;
 mod handlers;
 
-// single threaded async runtime, we don't need any worker threads here
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<(), anyhow::Error> {
     let cli = Cli::parse();
 
-    let task_handler = handlers::task::Task {
+    let task_handler = handlers::task::NotionTaskHandler {
         notion: Box::new(Notion::new(
             String::from("https://api.notion.com"),
-            String::from("1234"),
+            env::var("NOTION_TOKEN").unwrap(),
         )?),
     };
     let init_handler = handlers::init::Init {};
@@ -26,7 +26,7 @@ async fn main() -> Result<(), anyhow::Error> {
         task: Box::new(task_handler),
     };
 
-    cli.handle_command(&handlers);
+    cli.handle_command(&handlers)?;
 
     return Ok(());
 }
