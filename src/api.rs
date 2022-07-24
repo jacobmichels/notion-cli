@@ -30,7 +30,10 @@ impl Notion {
 }
 
 impl NotionCaller for Notion {
-    fn list_tasks(&self) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
+    fn list_tasks(
+        &self,
+        database_id: String,
+    ) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
         unimplemented!()
     }
 }

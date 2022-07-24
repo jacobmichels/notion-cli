@@ -1,5 +1,5 @@
 use clap::{ArgGroup, Parser, Subcommand};
-use std::fmt::Display;
+use std::{cell::LazyCell, fmt::Display};
 
 use crate::handlers::task::Task;
 
@@ -7,8 +7,12 @@ use crate::handlers::task::Task;
 pub trait TaskHandler {
     /// Adds a task to the database
     fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
-    /// Lists all the tasks in the database
-    fn list(&self, status: &Option<TaskStatus>) -> Result<Vec<Task>, anyhow::Error>;
+    /// Lists the tasks in the database with the specified status
+    fn list(
+        &self,
+        status: &Option<TaskStatus>,
+        database_id: String,
+    ) -> Result<Vec<Task>, anyhow::Error>;
     /// Marks a list of tasks as done
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
     /// Modifies the TaskStatus of multiple tasks
@@ -32,9 +36,9 @@ pub trait ConfigHandler {
 /// Struct containing all required handlers
 pub struct Handlers {
     /// Task handler
-    pub task: Box<dyn TaskHandler>,
+    pub task: LazyCell<Box<dyn TaskHandler>>,
     /// Config handler
-    pub config: Box<dyn ConfigHandler>,
+    pub config: LazyCell<Box<dyn ConfigHandler>>,
 }
 
 impl Cli {
@@ -53,7 +57,8 @@ impl Cli {
                 match subcommand {
                     TaskSubcommands::Add { name, status } => handlers.task.add(name, status)?,
                     TaskSubcommands::List { status } => {
-                        handlers.task.list(status)?;
+                        let database = handlers.config.get_database_id()?;
+                        handlers.task.list(status, database)?;
                     }
                     TaskSubcommands::Done { id } => handlers.task.done(id)?,
                     TaskSubcommands::Update { id, to, name } => {

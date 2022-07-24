@@ -23,7 +23,7 @@ impl Task {
 /// Defines Notion API operations
 pub trait NotionCaller {
     /// Lists the tasks in the database
-    fn list_tasks(&self) -> Result<Vec<Task>, anyhow::Error>;
+    fn list_tasks(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
 }
 
 /// A task handler that wraps a Notion client
@@ -55,8 +55,12 @@ impl TaskHandler for NotionTaskHandler {
         return Ok(());
     }
 
-    fn list(&self, status: &Option<TaskStatus>) -> Result<Vec<Task>, anyhow::Error> {
-        return self.notion.list_tasks();
+    fn list(
+        &self,
+        status: &Option<TaskStatus>,
+        database_id: String,
+    ) -> Result<Vec<Task>, anyhow::Error> {
+        return self.notion.list_tasks(database_id);
     }
 
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error> {
