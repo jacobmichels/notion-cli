@@ -16,7 +16,7 @@ pub trait TaskHandler {
 }
 
 pub trait InitHandler {
-    fn init(&self, database_id: &String) -> anyhow::Result<()>;
+    fn init(&self, database_id: &str) -> anyhow::Result<()>;
 }
 
 pub struct Handlers {
