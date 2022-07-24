@@ -5,15 +5,17 @@ use std::{
 
 use crate::cli::InitHandler;
 
-pub struct PersistantInitHandler {}
+/// An InitHandler that persists the task database_id as json
+pub struct JSONInitHandler {}
 
-impl PersistantInitHandler {
-    pub fn new() -> PersistantInitHandler {
-        return PersistantInitHandler {};
+impl JSONInitHandler {
+    /// Create a new JSONInitHandler
+    pub fn new() -> JSONInitHandler {
+        return JSONInitHandler {};
     }
 }
 
-impl InitHandler for PersistantInitHandler {
+impl InitHandler for JSONInitHandler {
     // creates a config file ~/.notion-cli/config.json and populates it with the database_id to use
     // maybe should be refactored eventually for testability and to optionally use a wizard to find the correct db
     fn init(&self, database_id: &str) -> anyhow::Result<()> {

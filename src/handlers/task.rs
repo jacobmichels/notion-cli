@@ -5,28 +5,35 @@ use crate::{
     cli::{TaskHandler, TaskStatus},
 };
 
+/// A Notion task
 pub struct Task {
+    /// The task's ID
     pub id: String,
+    /// The task's current status
     pub status: TaskStatus,
 }
 
 impl Task {
+    /// Construct a new Task instance with an ID and status
     pub fn new(id: String, status: TaskStatus) -> Task {
         return Task { id, status };
     }
 }
 
+/// Defines Notion API operations
 pub trait NotionCaller {
+    /// Lists the tasks in the database
     fn list_tasks(&self) -> Result<Vec<Task>, anyhow::Error>;
-    // fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error>;
-    // fn list_tasks_in_db(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
 }
 
+/// A task handler that wraps a Notion client
 pub struct NotionTaskHandler {
+    /// The Notion client
     pub notion: Box<dyn NotionCaller>,
 }
 
 impl NotionTaskHandler {
+    /// Construct a new NotionTaskHandler given a Notion API client
     pub fn new(notion: Notion) -> NotionTaskHandler {
         return NotionTaskHandler {
             notion: Box::new(notion),
