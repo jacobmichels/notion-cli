@@ -22,27 +22,7 @@ impl Notion {
             token,
         });
     }
-}
 
-#[derive(Deserialize, Debug)]
-struct SearchResponse {
-    object: String,
-    results: Vec<SearchResponseObject>,
-}
-
-#[derive(Deserialize, Debug)]
-struct SearchResponseObject {
-    object: String,
-    id: String,
-}
-
-impl From<&SearchResponseObject> for String {
-    fn from(obj: &SearchResponseObject) -> Self {
-        return obj.id.to_string();
-    }
-}
-
-impl NotionCaller for Notion {
     fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error> {
         let res = self
             .client
@@ -78,10 +58,34 @@ impl NotionCaller for Notion {
             .collect());
     }
 
-    fn list_tasks_in_db(
-        &self,
-        database_id: String,
-    ) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
-        self.client.
-       }
+    // fn list_tasks_in_db(
+    //     &self,
+    //     database_id: String,
+    // ) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
+    //     self.client.
+    //    }
+}
+
+#[derive(Deserialize, Debug)]
+struct SearchResponse {
+    object: String,
+    results: Vec<SearchResponseObject>,
+}
+
+#[derive(Deserialize, Debug)]
+struct SearchResponseObject {
+    object: String,
+    id: String,
+}
+
+impl From<&SearchResponseObject> for String {
+    fn from(obj: &SearchResponseObject) -> Self {
+        return obj.id.to_string();
+    }
+}
+
+impl NotionCaller for Notion {
+    fn list_tasks(&self) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
+        unimplemented!()
+    }
 }

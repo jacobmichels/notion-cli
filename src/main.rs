@@ -16,7 +16,7 @@ fn main() -> Result<(), anyhow::Error> {
     let task_handler = handlers::task::NotionTaskHandler {
         notion: Box::new(Notion::new(
             String::from("https://api.notion.com"),
-            env::var("NOTION_TOKEN").unwrap(),
+            env::var("NOTION_TOKEN").expect("NOTION_TOKEN not defined"),
         )?),
     };
     let init_handler = handlers::init::Init {};

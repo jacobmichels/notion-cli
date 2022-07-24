@@ -14,8 +14,9 @@ impl Task {
 }
 
 pub trait NotionCaller {
-    fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error>;
-    fn list_tasks_in_db(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
+    fn list_tasks(&self) -> Result<Vec<Task>, anyhow::Error>;
+    // fn list_database_ids(&self) -> Result<Vec<String>, anyhow::Error>;
+    // fn list_tasks_in_db(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
 }
 
 pub struct NotionTaskHandler {
@@ -36,21 +37,8 @@ impl TaskHandler for NotionTaskHandler {
         return Ok(());
     }
 
-    fn list(&self, status: &Option<TaskStatus>) -> Result<(), anyhow::Error> {
-        let databases = self.notion.list_database_ids()?;
-        println!("{:?}", databases);
-
-        if databases.is_empty() {
-            return Err(anyhow::Error::msg(
-                "No databases found. Have you shared the database with the notion-cli integration?",
-            ));
-        } else if databases.len() > 1 {
-            return Err(anyhow::Error::msg(
-                "supplied token has access to more than one database",
-            ));
-        }
-
-        return Ok(());
+    fn list(&self, status: &Option<TaskStatus>) -> Result<Vec<Task>, anyhow::Error> {
+        return self.notion.list_tasks();
     }
 
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error> {

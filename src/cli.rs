@@ -1,9 +1,11 @@
 use clap::{ArgGroup, Parser, Subcommand};
 use std::fmt::Display;
 
+use crate::handlers::task::Task;
+
 pub trait TaskHandler {
     fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
-    fn list(&self, status: &Option<TaskStatus>) -> Result<(), anyhow::Error>;
+    fn list(&self, status: &Option<TaskStatus>) -> Result<Vec<Task>, anyhow::Error>;
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
     fn update(
         &self,
@@ -14,7 +16,7 @@ pub trait TaskHandler {
 }
 
 pub trait InitHandler {
-    fn init(&self);
+    fn init(&self, database_id: &String) -> anyhow::Result<()>;
 }
 
 pub struct Handlers {
@@ -27,19 +29,29 @@ impl Cli {
         match &self.command {
             Commands::Tasks { subcommand } => {
                 println!("Tasks command called");
+
                 match subcommand {
                     TaskSubcommands::Add { name, status } => handlers.task.add(name, status)?,
-                    TaskSubcommands::List { status } => handlers.task.list(status)?,
+                    TaskSubcommands::List { status } => {
+                        handlers.task.list(status)?;
+                    }
                     TaskSubcommands::Done { id } => handlers.task.done(id)?,
                     TaskSubcommands::Update { id, to, name } => {
                         handlers.task.update(id, to, name)?
                     }
-                }
+                };
+
+                return Ok(());
             }
-            Commands::Init => handlers.init.init(),
+            Commands::Init { database_id } => handlers.init.init(database_id),
         }
 
         return Ok(());
+    }
+
+    // function to ensure the app has been initialized with the init command
+    fn is_initialized() -> bool {
+        true
     }
 }
 
@@ -62,7 +74,10 @@ enum Commands {
         #[clap(subcommand)]
         subcommand: TaskSubcommands,
     },
-    Init,
+    Init {
+        #[clap(required = true)]
+        database_id: String,
+    },
 }
 
 #[derive(Subcommand)]
