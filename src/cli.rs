@@ -1,4 +1,5 @@
 use clap::{ArgGroup, Parser, Subcommand};
+use colour::{green, green_ln, red_ln};
 use std::cell::LazyCell;
 
 use crate::{
@@ -19,7 +20,7 @@ impl Cli {
     pub fn route_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
         match &self.command {
             Command::Tasks { subcommand } => {
-                println!("Tasks command called");
+                green_ln!("Tasks command called");
 
                 if !self.is_initialized() {
                     return Err(anyhow::Error::msg(
@@ -42,11 +43,12 @@ impl Cli {
                 return Ok(());
             }
             Command::Config { subcommand } => {
-                println!("Config command called");
+                green_ln!("Config command called");
                 match subcommand {
                     ConfigSubcommand::Get => {
                         let id = handlers.config.get_database_id()?;
-                        println!("Database ID: {}", id);
+                        green!("Database ID: ");
+                        red_ln!("{}", id)
                     }
                     ConfigSubcommand::Set { database_id } => {
                         handlers.config.set_database(database_id)?
