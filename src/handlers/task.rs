@@ -1,7 +1,7 @@
 use anyhow::Ok;
 
 use crate::{
-    api::NotionAPI,
+    notion::NotionAPI,
     task::{Task, TaskStatus},
     traits::{NotionCaller, TaskHandler},
 };
