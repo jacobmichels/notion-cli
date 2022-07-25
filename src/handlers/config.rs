@@ -6,7 +6,7 @@ use std::{
 
 use serde_json::Value;
 
-use crate::cli::ConfigHandler;
+use crate::traits::ConfigHandler;
 
 /// A ConfigHandler that persists the task database_id as json
 pub struct JSONConfigHandler {}

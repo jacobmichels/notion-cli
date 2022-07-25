@@ -9,29 +9,34 @@
 
 use std::{cell::LazyCell, env};
 
-use api::Notion;
+use api::NotionAPI;
 use clap::Parser;
-use cli::{Cli, ConfigHandler, TaskHandler};
-use handlers::{config::JSONConfigHandler, task::NotionTaskHandler};
+use cli::Cli;
+use handlers::{config::JSONConfigHandler, task::NotionAPITaskHandler};
+use traits::{ConfigHandler, TaskHandler};
 
 /// Defines types needed for talking to the Notion API
 mod api;
-/// Defines types needed for clap
+/// Defines clap cli types for parsing args and flags
 mod cli;
 /// Defines command line route handlers
 mod handlers;
+/// Defines types that express notion tasks =
+mod task;
+/// Defines traits
+mod traits;
 
 fn main() -> Result<(), anyhow::Error> {
-    let cli = Cli::parse();
+    let cli: Cli = Cli::parse();
 
     // lazily initialze our handlers, as at this point we don't know which one we'll need
     let task_handler: LazyCell<Box<dyn TaskHandler>> = LazyCell::new(|| {
-        let notion_api = Notion::new(
+        let notion_api = NotionAPI::new(
             String::from("https://api.notion.com"),
             env::var("NOTION_TOKEN").expect("NOTION_TOKEN not defined"),
         );
 
-        return Box::new(NotionTaskHandler::new(notion_api));
+        return Box::new(NotionAPITaskHandler::new(notion_api));
     });
     let config_handler: LazyCell<Box<dyn ConfigHandler>> =
         LazyCell::new(|| return Box::new(JSONConfigHandler::new()));
@@ -41,7 +46,7 @@ fn main() -> Result<(), anyhow::Error> {
         task: task_handler,
     };
 
-    cli.handle_command(&handlers)?;
+    cli.route_command(&handlers)?;
 
     return Ok(());
 }

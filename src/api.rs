@@ -1,9 +1,9 @@
 use reqwest::blocking::Client;
 
-use crate::handlers::task::NotionCaller;
+use crate::{task::Task, traits};
 
 /// Notion API wrapper
-pub struct Notion {
+pub struct NotionAPI {
     /// Notion's base url
     base_url: String,
     /// Notion integration token
@@ -12,16 +12,16 @@ pub struct Notion {
     client: Client,
 }
 
-impl Notion {
+impl NotionAPI {
     /// Construct a new Notion object provided a base_url and token
     /// Can panic if: TLS backend cannot be initialized, or the resolver cannot load the system configuration
-    pub fn new(base_url: String, token: String) -> Notion {
+    pub fn new(base_url: String, token: String) -> NotionAPI {
         let client = reqwest::blocking::ClientBuilder::new()
             .https_only(true)
             .build()
             .expect("http client configuration failed");
 
-        return Notion {
+        return NotionAPI {
             base_url,
             client,
             token,
@@ -29,11 +29,8 @@ impl Notion {
     }
 }
 
-impl NotionCaller for Notion {
-    fn list_tasks(
-        &self,
-        database_id: String,
-    ) -> Result<Vec<crate::handlers::task::Task>, anyhow::Error> {
+impl traits::NotionCaller for NotionAPI {
+    fn list_tasks(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error> {
         unimplemented!()
     }
 }

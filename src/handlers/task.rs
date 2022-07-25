@@ -1,47 +1,27 @@
 use anyhow::Ok;
 
 use crate::{
-    api::Notion,
-    cli::{TaskHandler, TaskStatus},
+    api::NotionAPI,
+    task::{Task, TaskStatus},
+    traits::{NotionCaller, TaskHandler},
 };
 
-/// A Notion task
-pub struct Task {
-    /// The task's ID
-    pub id: String,
-    /// The task's current status
-    pub status: TaskStatus,
-}
-
-impl Task {
-    /// Construct a new Task instance with an ID and status
-    pub fn new(id: String, status: TaskStatus) -> Task {
-        return Task { id, status };
-    }
-}
-
-/// Defines Notion API operations
-pub trait NotionCaller {
-    /// Lists the tasks in the database
-    fn list_tasks(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
-}
-
 /// A task handler that wraps a Notion client
-pub struct NotionTaskHandler {
+pub struct NotionAPITaskHandler {
     /// The Notion client
     pub notion: Box<dyn NotionCaller>,
 }
 
-impl NotionTaskHandler {
+impl NotionAPITaskHandler {
     /// Construct a new NotionTaskHandler given a Notion API client
-    pub fn new(notion: Notion) -> NotionTaskHandler {
-        return NotionTaskHandler {
+    pub fn new(notion: NotionAPI) -> NotionAPITaskHandler {
+        return NotionAPITaskHandler {
             notion: Box::new(notion),
         };
     }
 }
 
-impl TaskHandler for NotionTaskHandler {
+impl TaskHandler for NotionAPITaskHandler {
     fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error> {
         // convert the vec to a string, trimming the last space
         let name: String = name.iter().map(|s| s.to_string() + " ").collect::<String>();

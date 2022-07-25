@@ -1,39 +1,12 @@
 use clap::{ArgGroup, Parser, Subcommand};
-use std::{cell::LazyCell, fmt::Display};
+use std::cell::LazyCell;
 
-use crate::handlers::task::Task;
+use crate::{
+    task::TaskStatus,
+    traits::{ConfigHandler, TaskHandler},
+};
 
-/// Defines the operations that can be performed on a task
-pub trait TaskHandler {
-    /// Adds a task to the database
-    fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
-    /// Lists the tasks in the database with the specified status
-    fn list(
-        &self,
-        status: &Option<TaskStatus>,
-        database_id: String,
-    ) -> Result<Vec<Task>, anyhow::Error>;
-    /// Marks a list of tasks as done
-    fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
-    /// Modifies the TaskStatus of multiple tasks
-    fn update(
-        &self,
-        ids: &[String],
-        to: &Option<TaskStatus>,
-        name: &Option<String>,
-    ) -> Result<(), anyhow::Error>;
-}
-
-/// Defines the config operations
-pub trait ConfigHandler {
-    /// Saves the database_id for use in future calls
-    fn set_database(&self, database_id: &str) -> anyhow::Result<()>;
-
-    /// Gets the persisted database_id
-    fn get_database_id(&self) -> anyhow::Result<String>;
-}
-
-/// Struct containing all required handlers
+/// Struct containing all required handlers for routing
 pub struct Handlers {
     /// Task handler
     pub task: LazyCell<Box<dyn TaskHandler>>,
@@ -43,7 +16,7 @@ pub struct Handlers {
 
 impl Cli {
     /// Routes the command to the correct handler
-    pub fn handle_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
+    pub fn route_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
         match &self.command {
             Commands::Tasks { subcommand } => {
                 println!("Tasks command called");
@@ -174,26 +147,4 @@ enum ConfigSubcommands {
         #[clap(required = true)]
         database_id: String,
     },
-}
-
-/// The current status of a task
-#[derive(clap::ValueEnum, Clone)]
-pub enum TaskStatus {
-    /// Todo: not started
-    Todo,
-    /// Doing: started but not finished
-    Doing,
-    /// Done: finished
-    Done,
-}
-
-impl Display for TaskStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self {
-            TaskStatus::Todo => write!(f, "todo")?,
-            TaskStatus::Doing => write!(f, "doing")?,
-            TaskStatus::Done => write!(f, "done")?,
-        };
-        return Ok(());
-    }
 }
