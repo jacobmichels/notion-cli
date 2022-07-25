@@ -18,7 +18,7 @@ impl Cli {
     /// Routes the command to the correct handler
     pub fn route_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
         match &self.command {
-            Commands::Tasks { subcommand } => {
+            Command::Tasks { subcommand } => {
                 println!("Tasks command called");
 
                 if !self.is_initialized() {
@@ -28,27 +28,27 @@ impl Cli {
                 }
 
                 match subcommand {
-                    TaskSubcommands::Add { name, status } => handlers.task.add(name, status)?,
-                    TaskSubcommands::List { status } => {
+                    TaskSubcommand::Add { name, status } => handlers.task.add(name, status)?,
+                    TaskSubcommand::List { status } => {
                         let database = handlers.config.get_database_id()?;
                         handlers.task.list(status, database)?;
                     }
-                    TaskSubcommands::Done { id } => handlers.task.done(id)?,
-                    TaskSubcommands::Update { id, to, name } => {
+                    TaskSubcommand::Done { id } => handlers.task.done(id)?,
+                    TaskSubcommand::Update { id, to, name } => {
                         handlers.task.update(id, to, name)?
                     }
                 };
 
                 return Ok(());
             }
-            Commands::Config { subcommand } => {
+            Command::Config { subcommand } => {
                 println!("Config command called");
                 match subcommand {
-                    ConfigSubcommands::Get => {
+                    ConfigSubcommand::Get => {
                         let id = handlers.config.get_database_id()?;
                         println!("Database ID: {}", id);
                     }
-                    ConfigSubcommands::Set { database_id } => {
+                    ConfigSubcommand::Set { database_id } => {
                         handlers.config.set_database(database_id)?
                     }
                 }
@@ -76,29 +76,29 @@ impl Cli {
 pub struct Cli {
     /// Subcommands
     #[clap(subcommand)]
-    command: Commands,
+    command: Command,
 }
 
 /// Defines the different subcommands that can be called
 #[derive(Subcommand)]
-enum Commands {
+enum Command {
     /// Performs operations with tasks
     Tasks {
         /// Task operation to perform
         #[clap(subcommand)]
-        subcommand: TaskSubcommands,
+        subcommand: TaskSubcommand,
     },
     /// Used to configure the database task commands interact with
     Config {
         /// Config operation to perform
         #[clap(subcommand)]
-        subcommand: ConfigSubcommands,
+        subcommand: ConfigSubcommand,
     },
 }
 
 /// Defines the task commands that can be performed
 #[derive(Subcommand)]
-enum TaskSubcommands {
+enum TaskSubcommand {
     /// Lists the tasks in the database
     List {
         /// The status of the tasks to list
@@ -138,7 +138,7 @@ enum TaskSubcommands {
 
 /// Defines the config commands that can be performed
 #[derive(Subcommand)]
-enum ConfigSubcommands {
+enum ConfigSubcommand {
     /// Gets the current database_id
     Get,
     /// Sets the database_id
