@@ -20,8 +20,6 @@ impl Cli {
     pub fn route_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
         match &self.command {
             Command::Tasks { subcommand } => {
-                green_ln!("Tasks command called");
-
                 if !self.is_initialized() {
                     return Err(anyhow::Error::msg(
                         "App not initialized, please run config set",

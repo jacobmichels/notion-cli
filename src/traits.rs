@@ -5,11 +5,7 @@ pub trait TaskHandler {
     /// Adds a task to the database
     fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
     /// Lists the tasks in the database with the specified status
-    fn list(
-        &self,
-        status: &Option<TaskStatus>,
-        database_id: String,
-    ) -> Result<Vec<Task>, anyhow::Error>;
+    fn list(&self, status: &Option<TaskStatus>, database_id: String) -> Result<(), anyhow::Error>;
     /// Marks a list of tasks as done
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
     /// Modifies the TaskStatus of multiple tasks
@@ -33,5 +29,9 @@ pub trait ConfigHandler {
 /// An object that can perform Notion operations
 pub trait NotionCaller {
     /// Lists the tasks in the database
-    fn list_tasks(&self, database_id: String) -> Result<Vec<Task>, anyhow::Error>;
+    fn list_tasks(
+        &self,
+        database_id: String,
+        status: &Option<TaskStatus>,
+    ) -> Result<Vec<Task>, anyhow::Error>;
 }

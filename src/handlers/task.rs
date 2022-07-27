@@ -1,8 +1,9 @@
 use anyhow::Ok;
+use colour::red_ln;
 
 use crate::{
     notion::NotionAPI,
-    task::{Task, TaskStatus},
+    task::TaskStatus,
     traits::{NotionCaller, TaskHandler},
 };
 
@@ -35,12 +36,27 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn list(
-        &self,
-        status: &Option<TaskStatus>,
-        database_id: String,
-    ) -> Result<Vec<Task>, anyhow::Error> {
-        return self.notion.list_tasks(database_id);
+    fn list(&self, status: &Option<TaskStatus>, database_id: String) -> Result<(), anyhow::Error> {
+        let tasks = self.notion.list_tasks(database_id, status)?;
+
+        match status {
+            Some(s) => {
+                red_ln!("{} -------------------------------------------------", s);
+                for (i, task) in tasks.iter().enumerate() {
+                    task.print(i);
+                }
+                red_ln!("----------------------------------------------------");
+            }
+            None => {
+                red_ln!("----------------------------------------------------");
+                for (i, task) in tasks.iter().enumerate() {
+                    task.print_with_status(i);
+                }
+                red_ln!("----------------------------------------------------");
+            }
+        }
+
+        return Ok(());
     }
 
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error> {
