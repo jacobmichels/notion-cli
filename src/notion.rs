@@ -70,6 +70,8 @@ impl traits::NotionCaller for NotionAPI {
 
         let mut tasks: Vec<Task> = Vec::with_capacity(pages.len());
 
+        // turn each page into a task by extracting specific information
+        // could refactor this to use the From<T> trait
         for page in &pages {
             let task_title = page.properties["Name"]["title"][0]["text"]["content"]
                 .as_str()
