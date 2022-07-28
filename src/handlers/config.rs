@@ -67,7 +67,7 @@ impl ConfigHandler for JSONConfigHandler {
             .to_string());
     }
 
-    fn list_eligible_databases(&self) -> anyhow::Result<()> {
+    fn print_eligible_databases(&self) -> anyhow::Result<()> {
         let databases = self.notion.list_databases();
 
         return Ok(());

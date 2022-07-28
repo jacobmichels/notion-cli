@@ -17,6 +17,8 @@ use traits::{ConfigHandler, TaskHandler};
 
 /// Defines clap cli types for parsing args and flags
 mod cli;
+/// Defines the database type
+mod database;
 /// Defines command line route handlers
 mod handlers;
 /// Defines types needed for talking to the Notion API
@@ -50,8 +52,7 @@ fn main() -> Result<(), anyhow::Error> {
 }
 
 /// helper function to build a NotionAPI
-/// this will only be called once throughout the apps lifetime,
-/// even through it appears more than once in LazyCell initializers
+/// this will only be called once throughout the apps lifetime, even through it appears more than once in LazyCell
 fn instantiate_notion_client() -> NotionAPI {
     return NotionAPI::new(
         String::from("https://api.notion.com"),

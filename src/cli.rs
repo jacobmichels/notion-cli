@@ -54,7 +54,7 @@ impl Cli {
                     ConfigSubcommand::Set { database_id } => {
                         handlers.config.set_database(database_id)?
                     }
-                    ConfigSubcommand::List => handlers.config.list_eligible_databases()?,
+                    ConfigSubcommand::List => handlers.config.print_eligible_databases()?,
                 }
             }
         };

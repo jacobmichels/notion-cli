@@ -6,6 +6,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::{
+    database::Database,
     task::{Task, TaskStatus},
     traits,
 };
@@ -60,6 +61,26 @@ struct Page {
     properties: Value,
 }
 
+#[derive(Deserialize, Debug)]
+struct SearchResponse {
+    object: String,
+    results: Vec<DatabaseSearchResponse>,
+}
+
+#[derive(Deserialize, Debug)]
+struct DatabaseSearchResponse {
+    id: String,
+    title: Value,
+}
+
+// impl From<DatabaseSearchResponse> for Database {
+//     fn from(db: DatabaseSearchResponse) -> Self {
+//         let title = db.title[0][]
+
+//         return Database::new(db.id, db.title, eligible);
+//     }
+// }
+
 impl traits::NotionCaller for NotionAPI {
     fn list_tasks(
         &self,
@@ -100,8 +121,36 @@ impl traits::NotionCaller for NotionAPI {
         unimplemented!()
     }
 
-    fn list_databases(&self) -> anyhow::Result<()> {
-        unimplemented!()
+    fn list_databases(&self) -> anyhow::Result<Vec<Database>> {
+        let url = self.base_url.join("/v1/search")?;
+
+        let payload: Value = json!({
+            "filter":{
+                "value":"database",
+                "property":"object"
+            }
+        });
+
+        let response = self
+            .client
+            .post(url)
+            .bearer_auth(&self.token)
+            .header("Notion-Version", NOTION_VERSION)
+            .json(&payload)
+            .send()?;
+
+        let databases: Vec<Database> = Vec::new();
+
+        // let body: SearchResponse = response.json()?;
+
+        // for db in body.results {
+        //     databases.push(db.into())
+        // }
+
+        // println!("{:?}", body.results);
+        println!("{}", response.text()?);
+
+        return Ok(databases);
     }
 }
 
