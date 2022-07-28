@@ -97,6 +97,7 @@ impl traits::NotionCaller for NotionAPI {
         title: &str,
         status: &TaskStatus,
     ) -> anyhow::Result<()> {
+        unimplemented!()
     }
 }
 
