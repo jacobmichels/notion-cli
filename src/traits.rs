@@ -3,9 +3,14 @@ use crate::task::{Task, TaskStatus};
 /// Defines the operations that can be performed on a task
 pub trait TaskHandler {
     /// Adds a task to the database
-    fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error>;
+    fn add(
+        &self,
+        database_id: String,
+        name: &[String],
+        status: &TaskStatus,
+    ) -> Result<(), anyhow::Error>;
     /// Lists the tasks in the database with the specified status
-    fn list(&self, status: &Option<TaskStatus>, database_id: String) -> Result<(), anyhow::Error>;
+    fn list(&self, database_id: String, status: &Option<TaskStatus>) -> Result<(), anyhow::Error>;
     /// Marks a list of tasks as done
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
     /// Modifies the TaskStatus of multiple tasks
@@ -34,4 +39,8 @@ pub trait NotionCaller {
         database_id: String,
         status: &Option<TaskStatus>,
     ) -> Result<Vec<Task>, anyhow::Error>;
+
+    /// Adds a task to the database
+    fn add_task(&self, database_id: String, title: &str, status: &TaskStatus)
+        -> anyhow::Result<()>;
 }

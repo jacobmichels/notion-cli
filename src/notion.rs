@@ -90,6 +90,14 @@ impl traits::NotionCaller for NotionAPI {
 
         return Ok(tasks);
     }
+
+    fn add_task(
+        &self,
+        database_id: String,
+        title: &str,
+        status: &TaskStatus,
+    ) -> anyhow::Result<()> {
+    }
 }
 
 impl NotionAPI {

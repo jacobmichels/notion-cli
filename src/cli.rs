@@ -27,10 +27,13 @@ impl Cli {
                 }
 
                 match subcommand {
-                    TaskSubcommand::Add { name, status } => handlers.task.add(name, status)?,
+                    TaskSubcommand::Add { name, status } => {
+                        let database = handlers.config.get_database_id()?;
+                        handlers.task.add(database, name, status)?;
+                    }
                     TaskSubcommand::List { status } => {
                         let database = handlers.config.get_database_id()?;
-                        handlers.task.list(status, database)?;
+                        handlers.task.list(database, status)?;
                     }
                     TaskSubcommand::Done { id } => handlers.task.done(id)?,
                     TaskSubcommand::Update { id, to, name } => {

@@ -23,20 +23,25 @@ impl NotionAPITaskHandler {
 }
 
 impl TaskHandler for NotionAPITaskHandler {
-    fn add(&self, name: &[String], status: &TaskStatus) -> Result<(), anyhow::Error> {
+    fn add(
+        &self,
+        database_id: String,
+        title: &[String],
+        status: &TaskStatus,
+    ) -> Result<(), anyhow::Error> {
         // convert the vec to a string, trimming the last space
-        let name: String = name.iter().map(|s| s.to_string() + " ").collect::<String>();
-        let name = name.trim_end();
+        let title: String = title
+            .iter()
+            .map(|s| s.to_string() + " ")
+            .collect::<String>();
+        let title = title.trim_end();
 
-        println!(
-            "Add subcommand called. name = {:?} status = {}. This should return a link to the task it just created.",
-            name,status
-        );
+        self.notion.add_task(database_id, title, status)?;
 
         return Ok(());
     }
 
-    fn list(&self, status: &Option<TaskStatus>, database_id: String) -> Result<(), anyhow::Error> {
+    fn list(&self, database_id: String, status: &Option<TaskStatus>) -> Result<(), anyhow::Error> {
         let tasks = self.notion.list_tasks(database_id, status)?;
 
         match status {
