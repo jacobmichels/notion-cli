@@ -2,7 +2,6 @@ use anyhow::Ok;
 use colour::red_ln;
 
 use crate::{
-    notion::NotionAPI,
     task::TaskStatus,
     traits::{NotionCaller, TaskHandler},
 };
@@ -10,15 +9,13 @@ use crate::{
 /// A task handler that wraps a Notion client
 pub struct NotionAPITaskHandler {
     /// The Notion client
-    pub notion: Box<dyn NotionCaller>,
+    notion: Box<dyn NotionCaller>,
 }
 
 impl NotionAPITaskHandler {
     /// Construct a new NotionTaskHandler given a Notion API client
-    pub fn new(notion: NotionAPI) -> NotionAPITaskHandler {
-        return NotionAPITaskHandler {
-            notion: Box::new(notion),
-        };
+    pub fn new(notion: Box<dyn NotionCaller>) -> NotionAPITaskHandler {
+        return NotionAPITaskHandler { notion };
     }
 }
 

@@ -99,6 +99,10 @@ impl traits::NotionCaller for NotionAPI {
     ) -> anyhow::Result<()> {
         unimplemented!()
     }
+
+    fn list_databases(&self) -> anyhow::Result<()> {
+        unimplemented!()
+    }
 }
 
 impl NotionAPI {

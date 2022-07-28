@@ -6,15 +6,18 @@ use std::{
 
 use serde_json::Value;
 
-use crate::traits::ConfigHandler;
+use crate::traits::{ConfigHandler, NotionCaller};
 
 /// A ConfigHandler that persists the task database_id as json
-pub struct JSONConfigHandler {}
+pub struct JSONConfigHandler {
+    /// the notion client used to list eligible databases
+    notion: Box<dyn NotionCaller>,
+}
 
 impl JSONConfigHandler {
     /// Create a new JSONConfigHandler
-    pub fn new() -> JSONConfigHandler {
-        return JSONConfigHandler {};
+    pub fn new(notion: Box<dyn NotionCaller>) -> JSONConfigHandler {
+        return JSONConfigHandler { notion };
     }
 
     /// Gets the config directory
@@ -62,5 +65,11 @@ impl ConfigHandler for JSONConfigHandler {
             .as_str()
             .expect("malformed config file")
             .to_string());
+    }
+
+    fn list_eligible_databases(&self) -> anyhow::Result<()> {
+        let databases = self.notion.list_databases();
+
+        return Ok(());
     }
 }

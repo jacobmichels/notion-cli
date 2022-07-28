@@ -31,16 +31,13 @@ fn main() -> Result<(), anyhow::Error> {
 
     // lazily initialze our handlers, as at this point we don't know which one we'll need
     let task_handler: LazyCell<Box<dyn TaskHandler>> = LazyCell::new(|| {
-        let notion_api = NotionAPI::new(
-            String::from("https://api.notion.com"),
-            env::var("NOTION_TOKEN").expect("NOTION_TOKEN not defined"),
-        )
-        .expect("failed to construct notion api wrapper");
-
-        return Box::new(NotionAPITaskHandler::new(notion_api));
+        let notion_api = instantiate_notion_client();
+        return Box::new(NotionAPITaskHandler::new(Box::new(notion_api)));
     });
-    let config_handler: LazyCell<Box<dyn ConfigHandler>> =
-        LazyCell::new(|| return Box::new(JSONConfigHandler::new()));
+    let config_handler: LazyCell<Box<dyn ConfigHandler>> = LazyCell::new(|| {
+        let notion_api = instantiate_notion_client();
+        return Box::new(JSONConfigHandler::new(Box::new(notion_api)));
+    });
 
     let handlers = cli::Handlers {
         config: config_handler,
@@ -50,4 +47,15 @@ fn main() -> Result<(), anyhow::Error> {
     cli.route_command(&handlers)?;
 
     return Ok(());
+}
+
+/// helper function to build a NotionAPI
+/// this will only be called once throughout the apps lifetime,
+/// even through it appears more than once in LazyCell initializers
+fn instantiate_notion_client() -> NotionAPI {
+    return NotionAPI::new(
+        String::from("https://api.notion.com"),
+        env::var("NOTION_TOKEN").expect("NOTION_TOKEN not defined"),
+    )
+    .expect("failed to construct notion api wrapper");
 }

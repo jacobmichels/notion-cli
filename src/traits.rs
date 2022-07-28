@@ -29,6 +29,9 @@ pub trait ConfigHandler {
 
     /// Gets the persisted database_id
     fn get_database_id(&self) -> anyhow::Result<String>;
+
+    /// Prints titles and names of databases that can be used by the app
+    fn list_eligible_databases(&self) -> anyhow::Result<()>;
 }
 
 /// An object that can perform Notion operations
@@ -43,4 +46,6 @@ pub trait NotionCaller {
     /// Adds a task to the database
     fn add_task(&self, database_id: String, title: &str, status: &TaskStatus)
         -> anyhow::Result<()>;
+
+    fn list_databases(&self) -> anyhow::Result<()>;
 }

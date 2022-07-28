@@ -54,6 +54,7 @@ impl Cli {
                     ConfigSubcommand::Set { database_id } => {
                         handlers.config.set_database(database_id)?
                     }
+                    ConfigSubcommand::List => handlers.config.list_eligible_databases()?,
                 }
             }
         };
@@ -150,4 +151,6 @@ enum ConfigSubcommand {
         #[clap(required = true)]
         database_id: String,
     },
+    /// List eligble databases
+    List,
 }
