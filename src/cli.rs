@@ -1,3 +1,4 @@
+use anyhow::{bail, Result};
 use clap::{ArgGroup, Parser, Subcommand};
 use colour::{green, red_ln};
 use std::cell::LazyCell;
@@ -17,13 +18,11 @@ pub struct Handlers {
 
 impl Cli {
     /// Routes the command to the correct handler
-    pub fn route_command(&self, handlers: &Handlers) -> Result<(), anyhow::Error> {
+    pub fn route_command(&self, handlers: &Handlers) -> Result<()> {
         match &self.command {
             Command::Tasks { subcommand } => {
                 if !self.is_initialized() {
-                    return Err(anyhow::Error::msg(
-                        "App not initialized, please run config set",
-                    ));
+                    bail!("App not initialized, please run config set");
                 }
 
                 match subcommand {

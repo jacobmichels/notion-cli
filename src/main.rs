@@ -9,6 +9,7 @@
 
 use std::{cell::LazyCell, env};
 
+use anyhow::Result;
 use clap::Parser;
 use cli::Cli;
 use handlers::{config::JSONConfigHandler, task::NotionAPITaskHandler};
@@ -28,7 +29,7 @@ mod task;
 /// Defines traits
 mod traits;
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<()> {
     let cli: Cli = Cli::parse();
 
     // lazily initialze our handlers, as at this point we don't know which one we'll need

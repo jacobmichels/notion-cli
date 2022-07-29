@@ -4,6 +4,7 @@ use std::{
     path::PathBuf,
 };
 
+use anyhow::{bail, Result};
 use colour::red_ln;
 use serde_json::Value;
 
@@ -22,13 +23,11 @@ impl JSONConfigHandler {
     }
 
     /// Gets the config directory
-    fn get_config_dir(&self) -> anyhow::Result<PathBuf> {
+    fn get_config_dir(&self) -> Result<PathBuf> {
         let mut config_dir = match dirs::home_dir() {
             Some(dir) => dir,
             None => {
-                return Err(anyhow::Error::msg(
-                    "failed to get home_dir for this platform",
-                ))
+                bail!("failed to get home_dir for this platform");
             }
         };
         config_dir.push(".notion-cli");
@@ -40,7 +39,7 @@ impl JSONConfigHandler {
 impl ConfigHandler for JSONConfigHandler {
     // creates a config file ~/.notion-cli/config.json and populates it with the database_id to use
     // maybe should be refactored eventually for testability and to optionally use a wizard to find the correct db
-    fn set_database(&self, database_id: &str) -> anyhow::Result<()> {
+    fn set_database(&self, database_id: &str) -> Result<()> {
         let cfg = serde_json::json!({ "database": database_id });
 
         let config_dir = self.get_config_dir()?;
@@ -55,7 +54,7 @@ impl ConfigHandler for JSONConfigHandler {
         return Ok(());
     }
 
-    fn get_database_id(&self) -> anyhow::Result<String> {
+    fn get_database_id(&self) -> Result<String> {
         let config_dir = self.get_config_dir()?;
 
         let file = fs::File::open(config_dir.join("config.json"))?;
@@ -68,7 +67,7 @@ impl ConfigHandler for JSONConfigHandler {
             .to_string());
     }
 
-    fn print_eligible_databases(&self) -> anyhow::Result<()> {
+    fn print_eligible_databases(&self) -> Result<()> {
         let databases = self.notion.list_eligible_databases()?;
 
         if databases.is_empty() {

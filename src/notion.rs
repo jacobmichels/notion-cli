@@ -1,6 +1,6 @@
 use std::{collections::HashSet, str::FromStr};
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use reqwest::{blocking::Client, Url};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -27,7 +27,7 @@ pub struct NotionAPI {
 impl NotionAPI {
     /// Construct a new Notion object provided a base_url and token
     /// Can panic if: TLS backend cannot be initialized, or the resolver cannot load the system configuration
-    pub fn new(base_url: String, token: String) -> anyhow::Result<NotionAPI> {
+    pub fn new(base_url: String, token: String) -> Result<NotionAPI> {
         let client = reqwest::blocking::ClientBuilder::new()
             .https_only(true)
             .build()?;
@@ -109,11 +109,7 @@ impl DatabaseSearchResponse {
 }
 
 impl traits::NotionCaller for NotionAPI {
-    fn list_tasks(
-        &self,
-        database_id: &str,
-        status: &Option<TaskStatus>,
-    ) -> Result<Vec<Task>, anyhow::Error> {
+    fn list_tasks(&self, database_id: &str, status: &Option<TaskStatus>) -> Result<Vec<Task>> {
         let pages = self.get_pages_from_db(database_id, status)?;
 
         let mut tasks: Vec<Task> = Vec::with_capacity(pages.len());
@@ -125,7 +121,7 @@ impl traits::NotionCaller for NotionAPI {
                 .as_str()
                 .expect("no title for page");
 
-            let status: anyhow::Result<TaskStatus> = page.try_into();
+            let status: Result<TaskStatus> = page.try_into();
             if status.is_err() {
                 continue;
             }
@@ -139,7 +135,7 @@ impl traits::NotionCaller for NotionAPI {
         return Ok(tasks);
     }
 
-    fn add_task(&self, database_id: &str, title: &str, status: &TaskStatus) -> anyhow::Result<()> {
+    fn add_task(&self, database_id: &str, title: &str, status: &TaskStatus) -> Result<()> {
         let url = self.base_url.join("/v1/pages")?;
 
         let status = status.as_notion_status();
@@ -178,7 +174,7 @@ impl traits::NotionCaller for NotionAPI {
         return Ok(());
     }
 
-    fn list_eligible_databases(&self) -> anyhow::Result<Vec<Database>> {
+    fn list_eligible_databases(&self) -> Result<Vec<Database>> {
         let url = self.base_url.join("/v1/search")?;
 
         let payload: Value = json!({
@@ -223,7 +219,7 @@ impl NotionAPI {
         &self,
         database_id: &str,
         status: &Option<TaskStatus>,
-    ) -> anyhow::Result<Vec<Page>> {
+    ) -> Result<Vec<Page>> {
         let url = self
             .base_url
             .join(&format!("/v1/databases/{}/query", &database_id))?;
@@ -253,7 +249,7 @@ impl NotionAPI {
         let body: DatabaseQueryResponse = response.json()?;
 
         if body.object != "list" {
-            return Err(anyhow::Error::msg("Response was not a list of pages"));
+            bail!("Response was not a list of pages")
         }
 
         return Ok(body.results);

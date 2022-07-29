@@ -1,4 +1,4 @@
-use anyhow::Ok;
+use anyhow::{Ok, Result};
 use colour::{green_ln, red_ln};
 
 use crate::{
@@ -20,12 +20,7 @@ impl NotionAPITaskHandler {
 }
 
 impl TaskHandler for NotionAPITaskHandler {
-    fn add(
-        &self,
-        database_id: &str,
-        title: &str,
-        status: &TaskStatus,
-    ) -> Result<(), anyhow::Error> {
+    fn add(&self, database_id: &str, title: &str, status: &TaskStatus) -> Result<()> {
         let title = title.trim();
 
         self.notion.add_task(&database_id, title, status)?;
@@ -35,12 +30,7 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn list(
-        &self,
-        database_id: &str,
-        status: &Option<TaskStatus>,
-        with_id: &bool,
-    ) -> Result<(), anyhow::Error> {
+    fn list(&self, database_id: &str, status: &Option<TaskStatus>, with_id: &bool) -> Result<()> {
         let tasks = self.notion.list_tasks(&database_id, status)?;
 
         match status {
@@ -66,7 +56,7 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn done(&self, ids: &[String], name: &str) -> Result<(), anyhow::Error> {
+    fn done(&self, ids: &[String], name: &str) -> Result<()> {
         println!("Done subcommand called: ");
         println!("ids = {:?}", ids);
         println!("name = {:?}", name);
@@ -74,12 +64,7 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn update(
-        &self,
-        ids: &[String],
-        to: &Option<TaskStatus>,
-        name: &Option<String>,
-    ) -> Result<(), anyhow::Error> {
+    fn update(&self, ids: &[String], to: &Option<TaskStatus>, name: &Option<String>) -> Result<()> {
         let new_name = match name {
             Some(name) => name,
             None => "",
