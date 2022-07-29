@@ -1,5 +1,5 @@
 use clap::{ArgGroup, Parser, Subcommand};
-use colour::{green, green_ln, red_ln};
+use colour::{green, red_ln};
 use std::cell::LazyCell;
 
 use crate::{

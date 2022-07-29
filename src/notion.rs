@@ -145,7 +145,42 @@ impl traits::NotionCaller for NotionAPI {
         title: &str,
         status: &TaskStatus,
     ) -> anyhow::Result<()> {
-        unimplemented!()
+        let url = self.base_url.join("/v1/pages")?;
+
+        let status = status.as_notion_status();
+
+        let payload: Value = json!(
+        {
+            "parent": {
+                "database_id":database_id
+            },
+            "properties":{
+                "Name":{
+                    "title":[
+                        {
+                            "text": {
+                                "content":title
+                            }
+                        }
+                    ]
+                },
+                "Status":{
+                    "select":{
+                        "name":status
+                    }
+                }
+            }
+        });
+
+        self.client
+            .post(url)
+            .bearer_auth(&self.token)
+            .header("Notion-Version", NOTION_VERSION)
+            .json(&payload)
+            .send()?
+            .error_for_status()?;
+
+        return Ok(());
     }
 
     fn list_eligible_databases(&self) -> anyhow::Result<Vec<Database>> {
@@ -205,7 +240,7 @@ impl NotionAPI {
             .bearer_auth(&self.token);
 
         if let Some(s) = status {
-            let filter = s.as_status_filter();
+            let filter = s.as_notion_status();
             let payload = Some(json!({
                 "filter":{
                     "property":"Status",

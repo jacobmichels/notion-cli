@@ -54,7 +54,7 @@ impl TaskStatus {
     /// TaskStatus::Todo -> To Do
     /// TaskStatus::Doing -> Doing
     /// TaskStatus::Done -> Done
-    pub fn as_status_filter(&self) -> String {
+    pub fn as_notion_status(&self) -> String {
         return match self {
             TaskStatus::Todo => "To Do".to_string(),
             TaskStatus::Doing => "Doing".to_string(),

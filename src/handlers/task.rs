@@ -1,5 +1,5 @@
 use anyhow::Ok;
-use colour::red_ln;
+use colour::{green_ln, red_ln};
 
 use crate::{
     task::TaskStatus,
@@ -34,6 +34,8 @@ impl TaskHandler for NotionAPITaskHandler {
         let title = title.trim_end();
 
         self.notion.add_task(database_id, title, status)?;
+
+        green_ln!("Task added!");
 
         return Ok(());
     }
