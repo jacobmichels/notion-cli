@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use colour::{blue_ln, green_ln};
+use colour::{blue, green};
 
 /// A Notion task
 #[derive(Debug)]
@@ -19,21 +19,23 @@ impl Task {
         return Task { id, status, title };
     }
 
-    /// Pretty print a task and it's status
-    pub fn print_with_status(&self, i: usize) {
-        if i % 2 == 0 {
-            green_ln!("Task: {} \nStatus: {}", self.title, self.status)
-        } else {
-            blue_ln!("Task: {} \nStatus: {}", self.title, self.status);
-        }
-    }
-
     /// Pretty print a task
-    pub fn print(&self, i: usize) {
+    pub fn print(&self, i: usize, with_status: bool, with_id: bool) {
+        let mut out = String::new();
+        out.push_str(format!("Task: {}\n", self.title).as_str());
+
+        if with_status {
+            out.push_str(format!("Status: {}\n", self.status).as_str());
+        }
+
+        if with_id {
+            out.push_str(format!("ID: {}\n", self.id).as_str());
+        }
+
         if i % 2 == 0 {
-            green_ln!("Task: {}", self.title)
+            green!("{}", out)
         } else {
-            blue_ln!("Task: {}", self.title);
+            blue!("{}", out);
         }
     }
 }
