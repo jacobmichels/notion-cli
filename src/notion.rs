@@ -111,7 +111,7 @@ impl DatabaseSearchResponse {
 impl traits::NotionCaller for NotionAPI {
     fn list_tasks(
         &self,
-        database_id: String,
+        database_id: &str,
         status: &Option<TaskStatus>,
     ) -> Result<Vec<Task>, anyhow::Error> {
         let pages = self.get_pages_from_db(database_id, status)?;
@@ -139,12 +139,7 @@ impl traits::NotionCaller for NotionAPI {
         return Ok(tasks);
     }
 
-    fn add_task(
-        &self,
-        database_id: String,
-        title: &str,
-        status: &TaskStatus,
-    ) -> anyhow::Result<()> {
+    fn add_task(&self, database_id: &str, title: &str, status: &TaskStatus) -> anyhow::Result<()> {
         let url = self.base_url.join("/v1/pages")?;
 
         let status = status.as_notion_status();
@@ -226,7 +221,7 @@ impl NotionAPI {
     /// optionally filters the on TaskStatus
     fn get_pages_from_db(
         &self,
-        database_id: String,
+        database_id: &str,
         status: &Option<TaskStatus>,
     ) -> anyhow::Result<Vec<Page>> {
         let url = self

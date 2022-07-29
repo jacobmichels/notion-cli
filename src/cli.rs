@@ -29,13 +29,13 @@ impl Cli {
                 match subcommand {
                     TaskSubcommand::Add { name, status } => {
                         let database = handlers.config.get_database_id()?;
-                        handlers.task.add(database, name, status)?;
+                        handlers.task.add(&database, name, status)?;
                     }
                     TaskSubcommand::List { status, with_id } => {
                         let database = handlers.config.get_database_id()?;
-                        handlers.task.list(database, status, with_id)?;
+                        handlers.task.list(&database, status, with_id)?;
                     }
-                    TaskSubcommand::Done { id } => handlers.task.done(id)?,
+                    TaskSubcommand::Done { ids, name } => handlers.task.done(ids, name)?,
                     TaskSubcommand::Update { id, to, name } => {
                         handlers.task.update(id, to, name)?
                     }
@@ -105,15 +105,15 @@ enum TaskSubcommand {
         /// The status of the tasks to list
         #[clap(long, short, value_enum)]
         status: Option<TaskStatus>,
+        /// Whether or not to include the task ID in the listing
         #[clap(long, short)]
         with_id: bool,
     },
     /// Add a task to the database
     Add {
         /// The name of the task
-        /// Needs to be a Vec so spaces are handled
         #[clap(required = true)]
-        name: Vec<String>,
+        name: String,
         /// Status of the task to add
         #[clap(long, short, value_enum)]
         status: TaskStatus,
@@ -132,10 +132,14 @@ enum TaskSubcommand {
         name: Option<String>,
     },
     /// Mark tasks as done
+    #[clap(group(ArgGroup::new("done").required(true).multiple(false).args(&["ids", "name"])))]
     Done {
-        /// The list of tasks to mark as done
-        #[clap(required = true)]
-        id: Vec<String>,
+        /// A list of task IDs to mark as done
+        ids: Vec<String>,
+        /// The name of a task to mark as done
+        /// Doesn't have to be an exist match, this will match to a task if the task title contains the given string (case insensitive)
+        #[clap(long, short)]
+        name: String,
     },
 }
 

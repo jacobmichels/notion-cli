@@ -22,18 +22,13 @@ impl NotionAPITaskHandler {
 impl TaskHandler for NotionAPITaskHandler {
     fn add(
         &self,
-        database_id: String,
-        title: &[String],
+        database_id: &str,
+        title: &str,
         status: &TaskStatus,
     ) -> Result<(), anyhow::Error> {
-        // convert the vec to a string, trimming the last space
-        let title: String = title
-            .iter()
-            .map(|s| s.to_string() + " ")
-            .collect::<String>();
-        let title = title.trim_end();
+        let title = title.trim();
 
-        self.notion.add_task(database_id, title, status)?;
+        self.notion.add_task(&database_id, title, status)?;
 
         green_ln!("Task added!");
 
@@ -42,11 +37,11 @@ impl TaskHandler for NotionAPITaskHandler {
 
     fn list(
         &self,
-        database_id: String,
+        database_id: &str,
         status: &Option<TaskStatus>,
         with_id: &bool,
     ) -> Result<(), anyhow::Error> {
-        let tasks = self.notion.list_tasks(database_id, status)?;
+        let tasks = self.notion.list_tasks(&database_id, status)?;
 
         match status {
             Some(s) => {
@@ -71,8 +66,10 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn done(&self, ids: &[String]) -> Result<(), anyhow::Error> {
-        println!("Done subcommand called: id = {:?}", ids);
+    fn done(&self, ids: &[String], name: &str) -> Result<(), anyhow::Error> {
+        println!("Done subcommand called: ");
+        println!("ids = {:?}", ids);
+        println!("name = {:?}", name);
 
         return Ok(());
     }
