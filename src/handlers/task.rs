@@ -23,7 +23,7 @@ impl TaskHandler for NotionAPITaskHandler {
     fn add(&self, database_id: &str, title: &str, status: &TaskStatus) -> Result<()> {
         let title = title.trim();
 
-        self.notion.add_task(&database_id, title, status)?;
+        self.notion.add_task(database_id, title, status)?;
 
         green_ln!("Task added!");
 
@@ -31,7 +31,7 @@ impl TaskHandler for NotionAPITaskHandler {
     }
 
     fn list(&self, database_id: &str, status: &Option<TaskStatus>, with_id: &bool) -> Result<()> {
-        let tasks = self.notion.list_tasks(&database_id, status)?;
+        let tasks = self.notion.list_tasks(database_id, status)?;
 
         match status {
             Some(s) => {
