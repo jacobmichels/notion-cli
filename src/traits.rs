@@ -50,5 +50,6 @@ pub trait NotionCaller {
     fn add_task(&self, database_id: String, title: &str, status: &TaskStatus)
         -> anyhow::Result<()>;
 
-    fn list_databases(&self) -> anyhow::Result<Vec<Database>>;
+    /// List all databases that have these three statuses: To Do, Doing, and Done
+    fn list_eligible_databases(&self) -> anyhow::Result<Vec<Database>>;
 }

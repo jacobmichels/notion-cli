@@ -43,20 +43,17 @@ impl Cli {
 
                 return Ok(());
             }
-            Command::Config { subcommand } => {
-                green_ln!("Config command called");
-                match subcommand {
-                    ConfigSubcommand::Get => {
-                        let id = handlers.config.get_database_id()?;
-                        green!("Database ID: ");
-                        red_ln!("{}", id)
-                    }
-                    ConfigSubcommand::Set { database_id } => {
-                        handlers.config.set_database(database_id)?
-                    }
-                    ConfigSubcommand::List => handlers.config.print_eligible_databases()?,
+            Command::Config { subcommand } => match subcommand {
+                ConfigSubcommand::Get => {
+                    let id = handlers.config.get_database_id()?;
+                    green!("Database ID: ");
+                    red_ln!("{}", id)
                 }
-            }
+                ConfigSubcommand::Set { database_id } => {
+                    handlers.config.set_database(database_id)?
+                }
+                ConfigSubcommand::List => handlers.config.print_eligible_databases()?,
+            },
         };
 
         return Ok(());

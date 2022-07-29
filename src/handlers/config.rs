@@ -4,6 +4,7 @@ use std::{
     path::PathBuf,
 };
 
+use colour::red_ln;
 use serde_json::Value;
 
 use crate::traits::{ConfigHandler, NotionCaller};
@@ -68,7 +69,18 @@ impl ConfigHandler for JSONConfigHandler {
     }
 
     fn print_eligible_databases(&self) -> anyhow::Result<()> {
-        let databases = self.notion.list_databases();
+        let databases = self.notion.list_eligible_databases()?;
+
+        if databases.is_empty() {
+            red_ln!("No eligible databases found");
+            return Ok(());
+        }
+
+        red_ln!("Eligible databases -----------------------------------------------------");
+        for (i, database) in databases.iter().enumerate() {
+            database.print(i);
+        }
+        red_ln!("------------------------------------------------------------------------");
 
         return Ok(());
     }

@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashSet, str::FromStr};
 
 use anyhow::bail;
 use reqwest::{blocking::Client, Url};
@@ -62,24 +62,51 @@ struct Page {
 }
 
 #[derive(Deserialize, Debug)]
+/// Notion API search response
 struct SearchResponse {
-    object: String,
+    /// List of Databases
     results: Vec<DatabaseSearchResponse>,
 }
 
 #[derive(Deserialize, Debug)]
+/// Database object returned by search
 struct DatabaseSearchResponse {
+    /// Database ID
     id: String,
+    /// Database title
     title: Value,
+    /// Database properties
+    properties: Value,
 }
 
-// impl From<DatabaseSearchResponse> for Database {
-//     fn from(db: DatabaseSearchResponse) -> Self {
-//         let title = db.title[0][]
+impl DatabaseSearchResponse {
+    /// Check if the database is compatible with the app
+    pub fn has_required_statuses(&self) -> bool {
+        // Check for the three required statuses
+        let statuses = self.properties["Status"]["select"]["options"]
+            .as_array()
+            .expect("statuses not an array");
 
-//         return Database::new(db.id, db.title, eligible);
-//     }
-// }
+        let mut status_set = HashSet::new();
+
+        for status in statuses {
+            let name = status["name"]
+                .as_str()
+                .expect("status does not have a name field");
+
+            status_set.insert(name);
+        }
+
+        if status_set.contains("To Do")
+            && status_set.contains("Doing")
+            && status_set.contains("Done")
+        {
+            return true;
+        }
+
+        return false;
+    }
+}
 
 impl traits::NotionCaller for NotionAPI {
     fn list_tasks(
@@ -121,7 +148,7 @@ impl traits::NotionCaller for NotionAPI {
         unimplemented!()
     }
 
-    fn list_databases(&self) -> anyhow::Result<Vec<Database>> {
+    fn list_eligible_databases(&self) -> anyhow::Result<Vec<Database>> {
         let url = self.base_url.join("/v1/search")?;
 
         let payload: Value = json!({
@@ -139,16 +166,21 @@ impl traits::NotionCaller for NotionAPI {
             .json(&payload)
             .send()?;
 
-        let databases: Vec<Database> = Vec::new();
+        let mut databases: Vec<Database> = Vec::new();
 
-        // let body: SearchResponse = response.json()?;
+        let body: SearchResponse = response.json()?;
 
-        // for db in body.results {
-        //     databases.push(db.into())
-        // }
+        for db_result in body.results {
+            let title = db_result.title[0]["text"]["content"]
+                .as_str()
+                .expect("failed to get database title");
 
-        // println!("{:?}", body.results);
-        println!("{}", response.text()?);
+            if db_result.has_required_statuses() {
+                let db = Database::new(db_result.id, title.to_string());
+
+                databases.push(db);
+            }
+        }
 
         return Ok(databases);
     }
