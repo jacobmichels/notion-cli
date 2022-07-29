@@ -1,7 +1,7 @@
 use std::{collections::HashSet, str::FromStr};
 
 use anyhow::{bail, Result};
-use reqwest::{blocking::Client, Url};
+use reqwest::{blocking::Client, header::HeaderMap, Url};
 use serde::Deserialize;
 use serde_json::{json, Value};
 
@@ -28,8 +28,12 @@ impl NotionAPI {
     /// Construct a new Notion object provided a base_url and token
     /// Can panic if: TLS backend cannot be initialized, or the resolver cannot load the system configuration
     pub fn new(base_url: String, token: String) -> Result<NotionAPI> {
+        let mut headers = HeaderMap::new();
+        headers.insert("Notion-Version", NOTION_VERSION.parse()?);
+
         let client = reqwest::blocking::ClientBuilder::new()
             .https_only(true)
+            .default_headers(headers)
             .build()?;
 
         let base_url = Url::from_str(&base_url)?;
@@ -166,7 +170,6 @@ impl traits::NotionCaller for NotionAPI {
         self.client
             .post(url)
             .bearer_auth(&self.token)
-            .header("Notion-Version", NOTION_VERSION)
             .json(&payload)
             .send()?
             .error_for_status()?;
@@ -188,7 +191,6 @@ impl traits::NotionCaller for NotionAPI {
             .client
             .post(url)
             .bearer_auth(&self.token)
-            .header("Notion-Version", NOTION_VERSION)
             .json(&payload)
             .send()?;
 
@@ -224,11 +226,7 @@ impl NotionAPI {
             .base_url
             .join(&format!("/v1/databases/{}/query", &database_id))?;
 
-        let mut request = self
-            .client
-            .post(url)
-            .header("Notion-Version", NOTION_VERSION)
-            .bearer_auth(&self.token);
+        let mut request = self.client.post(url).bearer_auth(&self.token);
 
         if let Some(s) = status {
             let filter = s.as_notion_status();
