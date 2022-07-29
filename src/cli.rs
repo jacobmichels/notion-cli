@@ -31,9 +31,9 @@ impl Cli {
                         let database = handlers.config.get_database_id()?;
                         handlers.task.add(database, name, status)?;
                     }
-                    TaskSubcommand::List { status } => {
+                    TaskSubcommand::List { status, with_id } => {
                         let database = handlers.config.get_database_id()?;
-                        handlers.task.list(database, status)?;
+                        handlers.task.list(database, status, with_id)?;
                     }
                     TaskSubcommand::Done { id } => handlers.task.done(id)?,
                     TaskSubcommand::Update { id, to, name } => {
@@ -71,7 +71,7 @@ impl Cli {
 #[derive(Parser)]
 #[clap(name = "github.com/jacobmichels/notion-cli")]
 #[clap(author = "Jacob Michels <jacob.michels2025@gmail.com>")]
-#[clap(version = "0.0.1")]
+#[clap(version = "0.1.0")]
 #[clap(about = "Interact with your notion board from the terminal", long_about = None)]
 #[clap(propagate_version = true)]
 pub struct Cli {
@@ -105,6 +105,8 @@ enum TaskSubcommand {
         /// The status of the tasks to list
         #[clap(long, short, value_enum)]
         status: Option<TaskStatus>,
+        #[clap(long, short)]
+        with_id: bool,
     },
     /// Add a task to the database
     Add {

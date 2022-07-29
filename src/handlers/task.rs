@@ -40,21 +40,29 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn list(&self, database_id: String, status: &Option<TaskStatus>) -> Result<(), anyhow::Error> {
+    fn list(
+        &self,
+        database_id: String,
+        status: &Option<TaskStatus>,
+        with_id: &bool,
+    ) -> Result<(), anyhow::Error> {
         let tasks = self.notion.list_tasks(database_id, status)?;
 
         match status {
             Some(s) => {
-                red_ln!("{} -------------------------------------------------", s);
+                red_ln!(
+                    "Tasks: {} -----------------------------------------------",
+                    s
+                );
                 for (i, task) in tasks.iter().enumerate() {
-                    task.print(i);
+                    task.print(i, false, *with_id);
                 }
                 red_ln!("----------------------------------------------------");
             }
             None => {
-                red_ln!("----------------------------------------------------");
+                red_ln!("Tasks ----------------------------------------------");
                 for (i, task) in tasks.iter().enumerate() {
-                    task.print_with_status(i);
+                    task.print(i, true, *with_id);
                 }
                 red_ln!("----------------------------------------------------");
             }

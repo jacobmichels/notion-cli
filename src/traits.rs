@@ -13,7 +13,12 @@ pub trait TaskHandler {
         status: &TaskStatus,
     ) -> Result<(), anyhow::Error>;
     /// Lists the tasks in the database with the specified status
-    fn list(&self, database_id: String, status: &Option<TaskStatus>) -> Result<(), anyhow::Error>;
+    fn list(
+        &self,
+        database_id: String,
+        status: &Option<TaskStatus>,
+        with_id: &bool,
+    ) -> Result<(), anyhow::Error>;
     /// Marks a list of tasks as done
     fn done(&self, ids: &[String]) -> Result<(), anyhow::Error>;
     /// Modifies the TaskStatus of multiple tasks
