@@ -34,7 +34,10 @@ impl Cli {
                         let database = handlers.config.get_database_id()?;
                         handlers.task.list(&database, status, with_id)?;
                     }
-                    TaskSubcommand::Done { ids, name } => handlers.task.done(ids, name)?,
+                    TaskSubcommand::Done { ids, name } => {
+                        let database = handlers.config.get_database_id()?;
+                        handlers.task.done(&database, ids, name.as_deref())?
+                    }
                     TaskSubcommand::Update { id, to, name } => {
                         handlers.task.update(id, to, name)?
                     }
@@ -138,7 +141,7 @@ enum TaskSubcommand {
         /// The name of a task to mark as done
         /// Doesn't have to be an exist match, this will match to a task if the task title contains the given string (case insensitive)
         #[clap(long, short)]
-        name: String,
+        name: Option<String>,
     },
 }
 

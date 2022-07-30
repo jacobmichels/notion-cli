@@ -1,8 +1,8 @@
-use anyhow::{Ok, Result};
+use anyhow::{bail, Ok, Result};
 use colour::{green_ln, red_ln};
 
 use crate::{
-    task::TaskStatus,
+    task::{Task, TaskStatus},
     traits::{NotionCaller, TaskHandler},
 };
 
@@ -56,10 +56,32 @@ impl TaskHandler for NotionAPITaskHandler {
         return Ok(());
     }
 
-    fn done(&self, ids: &[String], name: &str) -> Result<()> {
+    fn done(&self, database_id: &str, ids: &[String], name: Option<&str>) -> Result<()> {
         println!("Done subcommand called: ");
         println!("ids = {:?}", ids);
         println!("name = {:?}", name);
+
+        let id = if let Some(n) = name {
+            let tasks = self.notion.list_tasks(database_id, &None)?;
+
+            if tasks.is_empty() {
+                bail!("No tasks found");
+            }
+
+            let matching_tasks: Vec<&Task> =
+                tasks.iter().filter(|task| task.title.contains(n)).collect();
+
+            if matching_tasks.is_empty() {
+                bail!("No tasks match the given name");
+            }
+            if matching_tasks.len() > 1 {
+                bail!("More than one task matched the given name");
+            }
+
+            &matching_tasks.clone()[0].id
+        } else {
+            ""
+        };
 
         return Ok(());
     }
