@@ -3,7 +3,7 @@ use std::fmt::Display;
 use colour::{blue, green};
 
 /// A Notion task
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Task {
     /// The task's ID
     pub id: String,
@@ -41,7 +41,7 @@ impl Task {
 }
 
 /// The current status of a Notion task
-#[derive(clap::ValueEnum, Clone, Debug)]
+#[derive(clap::ValueEnum, Clone, Debug, Copy)]
 pub enum TaskStatus {
     /// Todo: not started
     Todo,

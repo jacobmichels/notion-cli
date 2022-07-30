@@ -212,6 +212,26 @@ impl traits::NotionCaller for NotionAPI {
 
         return Ok(databases);
     }
+
+    /// Finds first task that contains the given &str name
+    fn get_task_from_name(&self, database_id: &str, name: &str) -> Result<Task> {
+        let tasks = self.list_tasks(database_id, &None)?;
+
+        let matched = tasks
+            .iter()
+            .find(|task| task.title.to_lowercase().contains(&name.to_lowercase()));
+
+        if let Some(task) = matched {
+            let owned: Task = task.to_owned();
+            return Ok(owned);
+        } else {
+            bail!("No matchingtasks found");
+        }
+    }
+
+    fn mark_as_done(&self, database_id: &str, ids: &[String]) -> Result<()> {
+        unimplemented!()
+    }
 }
 
 impl NotionAPI {

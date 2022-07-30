@@ -39,4 +39,10 @@ pub trait NotionCaller {
 
     /// List all databases that have these three statuses: To Do, Doing, and Done
     fn list_eligible_databases(&self) -> Result<Vec<Database>>;
+
+    /// Mark the given task ids as done
+    fn mark_as_done(&self, database_id: &str, ids: &[String]) -> Result<()>;
+
+    /// Return the first task that contains pattern
+    fn get_task_from_name(&self, database_id: &str, pattern: &str) -> Result<Task>;
 }
