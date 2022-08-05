@@ -230,7 +230,28 @@ impl traits::NotionCaller for NotionAPI {
     }
 
     fn mark_as_done(&self, database_id: &str, ids: &[String]) -> Result<()> {
-        unimplemented!()
+        for id in ids {
+            let url = self.base_url.join(&format!("/v1/pages/{}", id))?;
+
+            let payload = json!({
+                "properties":{
+                    "Status":{
+                        "select":{
+                            "name":"Done"
+                        }
+                    }
+                }
+            });
+
+            self.client
+                .patch(url)
+                .bearer_auth(&self.token)
+                .json(&payload)
+                .send()?
+                .error_for_status()?;
+        }
+
+        return Ok(());
     }
 }
 
