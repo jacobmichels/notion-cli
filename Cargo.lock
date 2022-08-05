@@ -542,7 +542,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "notion-cli"
+name = "notion"
 version = "0.1.0"
 dependencies = [
  "anyhow",
