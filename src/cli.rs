@@ -120,12 +120,12 @@ enum TaskSubcommand {
         #[clap(long, short, value_enum)]
         status: TaskStatus,
     },
-    /// Update multiple tasks
+    /// Update a task
     #[clap(group(ArgGroup::new("update").required(true).multiple(true).args(&["to", "name"])))]
     Update {
-        /// Vec of IDs to update
+        /// The ID of the task to update
         #[clap(required = true)]
-        id: Vec<String>,
+        id: String,
         /// Status to mark the tasks as
         #[clap(long, short, value_enum)]
         to: Option<TaskStatus>,

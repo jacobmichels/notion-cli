@@ -229,7 +229,7 @@ impl traits::NotionCaller for NotionAPI {
         }
     }
 
-    fn mark_as_done(&self, database_id: &str, ids: &[String]) -> Result<()> {
+    fn mark_as_done(&self, ids: &[String]) -> Result<()> {
         for id in ids {
             let url = self.base_url.join(&format!("/v1/pages/{}", id))?;
 
@@ -250,6 +250,53 @@ impl traits::NotionCaller for NotionAPI {
                 .send()?
                 .error_for_status()?;
         }
+
+        return Ok(());
+    }
+
+    fn update_task(&self, id: &str, to: &Option<TaskStatus>, name: &Option<String>) -> Result<()> {
+        let mut payload = json!({
+            "properties":{}
+        });
+
+        let map = payload["properties"]
+            .as_object_mut()
+            .expect("properties field was not an object");
+
+        if let Some(status) = to {
+            let value = json!({
+                "select":{
+                    "name":status.as_notion_status()
+                }
+            });
+
+            map.insert("Status".to_string(), value);
+        }
+
+        if let Some(name) = name {
+            let value = json!({
+                "title":[
+                        {
+                            "text": {
+                                "content":name
+                            }
+                        }
+                    ]
+            });
+
+            map.insert("Name".to_string(), value);
+        }
+
+        payload["properties"] = Value::Object(map.clone());
+
+        let url = self.base_url.join(&format!("/v1/pages/{}", id))?;
+
+        self.client
+            .patch(url)
+            .bearer_auth(&self.token)
+            .json(&payload)
+            .send()?
+            .error_for_status()?;
 
         return Ok(());
     }

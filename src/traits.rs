@@ -14,7 +14,7 @@ pub trait TaskHandler {
     /// Marks a list of tasks as done
     fn done(&self, database_id: &str, ids: &[String], name: Option<&str>) -> Result<()>;
     /// Modifies the TaskStatus of multiple tasks
-    fn update(&self, ids: &[String], to: &Option<TaskStatus>, name: &Option<String>) -> Result<()>;
+    fn update(&self, ids: &str, to: &Option<TaskStatus>, name: &Option<String>) -> Result<()>;
 }
 
 /// Defines the config operations
@@ -41,8 +41,12 @@ pub trait NotionCaller {
     fn list_eligible_databases(&self) -> Result<Vec<Database>>;
 
     /// Mark the given task ids as done
-    fn mark_as_done(&self, database_id: &str, ids: &[String]) -> Result<()>;
+    fn mark_as_done(&self, ids: &[String]) -> Result<()>;
 
     /// Return the first task that contains pattern
     fn get_task_from_name(&self, database_id: &str, pattern: &str) -> Result<Task>;
+
+    /// Update the task to the supplied status and title
+    /// At least one of the supplied Optional values will be supplied
+    fn update_task(&self, id: &str, to: &Option<TaskStatus>, name: &Option<String>) -> Result<()>;
 }

@@ -64,28 +64,18 @@ impl TaskHandler for NotionAPITaskHandler {
         if let Some(n) = name {
             let task = self.notion.get_task_from_name(database_id, n)?;
             println!("{:?}", task);
-            self.notion.mark_as_done(database_id, &[task.id])?;
+            self.notion.mark_as_done(&[task.id])?;
         } else {
-            self.notion.mark_as_done(database_id, ids)?;
+            self.notion.mark_as_done(ids)?;
         };
 
         return Ok(());
     }
 
-    fn update(&self, ids: &[String], to: &Option<TaskStatus>, name: &Option<String>) -> Result<()> {
-        let new_name = match name {
-            Some(name) => name,
-            None => "",
-        };
-        let to_status = match to {
-            Some(status) => status.to_string(),
-            None => String::from("NO_CHANGE"),
-        };
+    fn update(&self, id: &str, to: &Option<TaskStatus>, name: &Option<String>) -> Result<()> {
+        self.notion.update_task(id, to, name)?;
 
-        println!(
-            "Update subcommand called. to = {} id = {:?} renaming to = {}",
-            to_status, ids, new_name
-        );
+        green_ln!("Successfully updated task");
 
         return Ok(());
     }
