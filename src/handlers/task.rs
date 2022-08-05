@@ -57,10 +57,6 @@ impl TaskHandler for NotionAPITaskHandler {
     }
 
     fn done(&self, database_id: &str, ids: &[String], name: Option<&str>) -> Result<()> {
-        println!("Done subcommand called: ");
-        println!("ids = {:?}", ids);
-        println!("name = {:?}", name);
-
         if let Some(n) = name {
             let task = self.notion.get_task_from_name(database_id, n)?;
             println!("{:?}", task);
