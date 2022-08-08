@@ -59,8 +59,8 @@ impl TaskHandler for NotionAPITaskHandler {
     fn done(&self, database_id: &str, ids: &[String], name: Option<&str>) -> Result<()> {
         if let Some(n) = name {
             let task = self.notion.get_task_from_name(database_id, n)?;
-            println!("{:?}", task);
             self.notion.mark_as_done(&[task.id])?;
+            green_ln!("{} marked as done", task.title);
         } else {
             self.notion.mark_as_done(ids)?;
         };
