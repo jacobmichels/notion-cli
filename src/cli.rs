@@ -21,10 +21,6 @@ impl Cli {
     pub fn route_command(&self, handlers: &Handlers) -> Result<()> {
         match &self.command {
             Command::Tasks { subcommand } => {
-                if !self.is_initialized() {
-                    bail!("App not initialized, please run config set");
-                }
-
                 match subcommand {
                     TaskSubcommand::Add { name, status } => {
                         let database = handlers.config.get_database_id()?;
@@ -59,11 +55,6 @@ impl Cli {
         };
 
         return Ok(());
-    }
-
-    /// Checks if the app has been initialized (database_id is available)
-    fn is_initialized(&self) -> bool {
-        return true;
     }
 }
 
