@@ -1,64 +1,66 @@
 use anyhow::Result;
 use clap::{ArgGroup, Parser, Subcommand};
-use colour::{green, red_ln};
-use std::cell::LazyCell;
 
 use crate::{
+    handlers::{config::JSONConfigHandler, task::NotionAPITaskHandler},
+    services::{config::JSONConfigService, notion::NotionAPI},
     task::TaskStatus,
-    traits::{ConfigHandler, TaskHandler},
+    traits::{ConfigCommandHandler, ConfigService, TaskHandler},
 };
-
-/// Struct containing all required handlers for routing
-pub struct Handlers {
-    /// Task handler
-    pub task: LazyCell<Box<dyn TaskHandler>>,
-    /// Config handler
-    pub config: LazyCell<Box<dyn ConfigHandler>>,
-}
 
 impl Cli {
     /// Routes the command to the correct handler
-    pub fn route_command(&self, handlers: &Handlers) -> Result<()> {
+    pub fn route_command(&self) -> Result<()> {
         match &self.command {
             Command::Tasks { subcommand } => {
+                let config = JSONConfigService::new().get_config()?;
+                let notion = NotionAPI::new("https://api.notion.com".to_string(), config.token)?;
+                let task_handler = NotionAPITaskHandler::new(Box::new(notion));
+
                 match subcommand {
                     TaskSubcommand::Add { name, status } => {
-                        let database = handlers.config.get_database_id()?;
-                        handlers.task.add(&database, name, status)?;
+                        task_handler.add(&config.database_id, name, status)?;
                     }
                     TaskSubcommand::List { status, with_id } => {
-                        let database = handlers.config.get_database_id()?;
-                        handlers.task.list(&database, status, with_id)?;
+                        task_handler.list(&config.database_id, status, with_id)?;
                     }
                     TaskSubcommand::Done { ids, name } => {
-                        let database = handlers.config.get_database_id()?;
-                        handlers.task.done(&database, ids, name.as_deref())?
+                        task_handler.done(&config.database_id, ids, name.as_deref())?;
                     }
                     TaskSubcommand::Update { id, to, name } => {
-                        handlers.task.update(id, to, name)?
+                        task_handler.update(id, to, name)?;
                     }
                 };
 
                 return Ok(());
             }
-            Command::Config { subcommand } => match subcommand {
-                ConfigSubcommand::Database { subcommand } => match subcommand {
-                    DatabaseConfigSubcommand::Get => {
-                        let id = handlers.config.get_database_id()?;
-                        green!("Database ID: ");
-                        red_ln!("{}", id);
-                    }
-                    DatabaseConfigSubcommand::List => handlers.config.print_eligible_databases()?,
-                    DatabaseConfigSubcommand::Set { database_id } => {
-                        handlers.config.set_database(database_id)?
-                    }
-                },
-                ConfigSubcommand::Token { subcommand } => match subcommand {
-                    TokenConfigSubcommand::Set { token } => {
-                        handlers.config.set_token(token)?;
-                    }
-                },
-            },
+            Command::Config { subcommand } => {
+                let config_service = JSONConfigService::new();
+                let notion = NotionAPI::new(
+                    "https://api.notion.com".to_string(),
+                    config_service.get_config()?.token,
+                )?;
+                let handler = JSONConfigHandler::new(Box::new(notion), Box::new(config_service));
+
+                match subcommand {
+                    ConfigSubcommand::Database { subcommand } => match subcommand {
+                        DatabaseConfigSubcommand::Get => {
+                            handler.get_database_id()?;
+                        }
+                        DatabaseConfigSubcommand::List => {
+                            handler.list_databases()?;
+                        }
+                        DatabaseConfigSubcommand::Set { database_id } => {
+                            handler.set_database(database_id)?;
+                        }
+                    },
+                    ConfigSubcommand::Token { subcommand } => match subcommand {
+                        TokenConfigSubcommand::Set { token } => {
+                            handler.set_token(token)?;
+                        }
+                    },
+                }
+            }
         };
 
         return Ok(());

@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::{
+    config::AppConfig,
     database::Database,
     task::{Task, TaskStatus},
 };
@@ -18,15 +19,15 @@ pub trait TaskHandler {
 }
 
 /// Defines the config operations
-pub trait ConfigHandler {
+pub trait ConfigCommandHandler {
     /// Saves the database_id for use in future calls
     fn set_database(&self, database_id: &str) -> Result<()>;
 
     /// Gets the persisted database_id
-    fn get_database_id(&self) -> Result<String>;
+    fn get_database_id(&self) -> Result<()>;
 
     /// Prints titles and names of databases that can be used by the app
-    fn print_eligible_databases(&self) -> Result<()>;
+    fn list_databases(&self) -> Result<()>;
 
     fn set_token(&self, token: &str) -> Result<()>;
 }
@@ -51,4 +52,9 @@ pub trait NotionCaller {
     /// Update the task to the supplied status and title
     /// At least one of the supplied Optional values will be supplied
     fn update_task(&self, id: &str, to: &Option<TaskStatus>, name: &Option<String>) -> Result<()>;
+}
+
+pub trait ConfigService {
+    fn get_config(&self) -> Result<AppConfig>;
+    fn set_config(&self, config: AppConfig) -> Result<()>;
 }
