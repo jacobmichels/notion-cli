@@ -1,7 +1,5 @@
 #![allow(clippy::needless_return)]
-#![warn(clippy::implicit_return)]
 #![warn(missing_docs)]
-#![warn(clippy::missing_docs_in_private_items)]
 
 //! A command line app for task management with notion
 //! This project requires a nightly rust compiler because of LazyCell!

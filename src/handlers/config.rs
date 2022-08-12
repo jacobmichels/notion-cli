@@ -1,12 +1,12 @@
 use std::{
     fs::{self, File},
-    io::{BufReader, Write},
-    path::PathBuf,
+    io::Write,
+    path::{Path, PathBuf},
 };
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Ok, Result};
 use colour::red_ln;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
 
 use crate::traits::{ConfigHandler, NotionCaller};
 
@@ -34,37 +34,58 @@ impl JSONConfigHandler {
 
         return Ok(config_dir);
     }
+
+    fn read_config(&self) -> Result<AppConfig> {
+        let config_dir = self.get_config_dir()?;
+        let config_path = config_dir.join("config.json");
+
+        let exists = Path::new(&config_path).exists();
+        if exists {
+            let file = File::open(config_path)?;
+            let cfg: AppConfig = serde_json::from_reader(file)?;
+            return Ok(cfg);
+        }
+
+        return Ok(AppConfig::default());
+    }
+
+    fn write_config(&self, cfg: AppConfig) -> Result<()> {
+        let config_dir = self.get_config_dir()?;
+        let config_path = config_dir.join("config.json");
+
+        fs::create_dir_all(config_dir)?;
+        let mut file = File::create(config_path)?;
+        let json_str = serde_json::to_string_pretty(&cfg)?;
+        file.write_all(json_str.as_bytes())?;
+
+        return Ok(());
+    }
+}
+
+#[derive(Deserialize, Serialize, Default)]
+struct AppConfig {
+    database_id: String,
+    token: String,
 }
 
 impl ConfigHandler for JSONConfigHandler {
     // creates a config file ~/.notion-cli/config.json and populates it with the database_id to use
     // maybe should be refactored eventually for testability and to optionally use a wizard to find the correct db
     fn set_database(&self, database_id: &str) -> Result<()> {
-        let cfg = serde_json::json!({ "database": database_id });
-
-        let config_dir = self.get_config_dir()?;
-
-        fs::create_dir_all(&config_dir)?;
-
-        // config file name probably shouldn't be hardcoded here
-        let mut file = File::create(config_dir.join("config.json"))?;
-
-        write!(&mut file, "{}", cfg)?;
+        let mut config = self.read_config()?;
+        config.database_id = database_id.to_string();
+        self.write_config(config)?;
 
         return Ok(());
     }
 
     fn get_database_id(&self) -> Result<String> {
-        let config_dir = self.get_config_dir()?;
-
-        let file = fs::File::open(config_dir.join("config.json"))?;
-        let reader = BufReader::new(file);
-
-        let json: Value = serde_json::from_reader(reader)?;
-        return Ok(json["database"]
-            .as_str()
-            .expect("malformed config file")
-            .to_string());
+        let config = self.read_config()?;
+        if config.database_id.is_empty() {
+            bail!("No database ID set");
+        } else {
+            return Ok(config.database_id);
+        }
     }
 
     fn print_eligible_databases(&self) -> Result<()> {
@@ -80,6 +101,14 @@ impl ConfigHandler for JSONConfigHandler {
             database.print(i);
         }
         red_ln!("------------------------------------------------------------------------");
+
+        return Ok(());
+    }
+
+    fn set_token(&self, token: &str) -> Result<()> {
+        let mut config = self.read_config()?;
+        config.token = token.to_string();
+        self.write_config(config)?;
 
         return Ok(());
     }

@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::{ArgGroup, Parser, Subcommand};
 use colour::{green, red_ln};
 use std::cell::LazyCell;
@@ -42,15 +42,22 @@ impl Cli {
                 return Ok(());
             }
             Command::Config { subcommand } => match subcommand {
-                ConfigSubcommand::Get => {
-                    let id = handlers.config.get_database_id()?;
-                    green!("Database ID: ");
-                    red_ln!("{}", id)
-                }
-                ConfigSubcommand::Set { database_id } => {
-                    handlers.config.set_database(database_id)?
-                }
-                ConfigSubcommand::List => handlers.config.print_eligible_databases()?,
+                ConfigSubcommand::Database { subcommand } => match subcommand {
+                    DatabaseConfigSubcommand::Get => {
+                        let id = handlers.config.get_database_id()?;
+                        green!("Database ID: ");
+                        red_ln!("{}", id);
+                    }
+                    DatabaseConfigSubcommand::List => handlers.config.print_eligible_databases()?,
+                    DatabaseConfigSubcommand::Set { database_id } => {
+                        handlers.config.set_database(database_id)?
+                    }
+                },
+                ConfigSubcommand::Token { subcommand } => match subcommand {
+                    TokenConfigSubcommand::Set { token } => {
+                        handlers.config.set_token(token)?;
+                    }
+                },
             },
         };
 
@@ -139,14 +146,26 @@ enum TaskSubcommand {
 /// Defines the config commands that can be performed
 #[derive(Subcommand)]
 enum ConfigSubcommand {
-    /// Gets the current database_id
-    Get,
-    /// Sets the database_id
-    Set {
-        /// The database id in question
-        #[clap(required = true)]
-        database_id: String,
+    /// Database configuration subcommand
+    Database {
+        #[clap(subcommand)]
+        subcommand: DatabaseConfigSubcommand,
     },
-    /// List eligble databases
+    /// Token configuration subcommand
+    Token {
+        #[clap(subcommand)]
+        subcommand: TokenConfigSubcommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum DatabaseConfigSubcommand {
+    Get,
+    Set { database_id: String },
     List,
+}
+
+#[derive(Subcommand)]
+enum TokenConfigSubcommand {
+    Set { token: String },
 }

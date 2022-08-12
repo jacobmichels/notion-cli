@@ -27,6 +27,8 @@ pub trait ConfigHandler {
 
     /// Prints titles and names of databases that can be used by the app
     fn print_eligible_databases(&self) -> Result<()>;
+
+    fn set_token(&self, token: &str) -> Result<()>;
 }
 
 /// An object that can perform Notion operations
