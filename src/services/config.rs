@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{config::AppConfig, traits::ConfigService};
+use crate::{models::config::AppConfig, traits::ConfigService};
 use anyhow::{bail, Result};
 
 pub struct JSONConfigService {}

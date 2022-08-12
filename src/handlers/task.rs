@@ -2,7 +2,7 @@ use anyhow::{Ok, Result};
 use colour::{green_ln, red_ln};
 
 use crate::{
-    task::TaskStatus,
+    models::task_status::TaskStatus,
     traits::{NotionCaller, TaskHandler},
 };
 

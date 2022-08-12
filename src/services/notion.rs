@@ -6,8 +6,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::{
-    database::Database,
-    task::{Task, TaskStatus},
+    models::{database::Database, task::Task, task_status::TaskStatus},
     traits,
 };
 

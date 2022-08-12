@@ -10,11 +10,9 @@ use clap::Parser;
 use cli::Cli;
 
 mod cli;
-mod config;
-mod database;
 mod handlers;
+mod models;
 mod services;
-mod task;
 mod traits;
 
 fn main() -> Result<()> {

@@ -1,10 +1,6 @@
 use anyhow::Result;
 
-use crate::{
-    config::AppConfig,
-    database::Database,
-    task::{Task, TaskStatus},
-};
+use crate::models::{config::AppConfig, database::Database, task::Task, task_status::TaskStatus};
 
 /// Defines the operations that can be performed on a task
 pub trait TaskHandler {

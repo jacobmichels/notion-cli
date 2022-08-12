@@ -3,8 +3,8 @@ use clap::{ArgGroup, Parser, Subcommand};
 
 use crate::{
     handlers::{config::JSONConfigHandler, task::NotionAPITaskHandler},
+    models::task_status::TaskStatus,
     services::{config::JSONConfigService, notion::NotionAPI},
-    task::TaskStatus,
     traits::{ConfigCommandHandler, ConfigService, TaskHandler},
 };
 
