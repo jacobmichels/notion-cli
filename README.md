@@ -7,17 +7,17 @@ Command line Notion task management
 
 A command line app that lets you interact with a Notion task board through [Notion's API](https://developers.notion.com/reference/intro).
 
-### Example usage
+## Example usage
 
 More details on command usage can be found by running `notion tasks <COMMAND> --help`
 
-#### Add
+### Add
 
 Add a new todo task to the board:
 
 `notion tasks add "Adopt five cats" --status todo`
 
-#### List
+### List
 
 List all tasks:
 
@@ -31,7 +31,7 @@ List all in-progress tasks:
 
 `notion tasks list --status doing`
 
-#### Done
+### Done
 
 Mark a task as done by name:
 
@@ -41,7 +41,7 @@ Mark a task as done by ID:
 
 `notion tasks done 59ad73ec-efbd-4b37-ad53-02c8f3b17c56`
 
-#### Update
+### Update
 
 Move a task to todo and update it's name:
 
