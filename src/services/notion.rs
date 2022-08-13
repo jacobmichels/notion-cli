@@ -102,7 +102,7 @@ impl DatabaseSearchResponse {
 
         if status_set.contains("To Do")
             && status_set.contains("Doing")
-            && status_set.contains("Done")
+            && status_set.contains("Done🙌")
         {
             return true;
         }
@@ -236,7 +236,7 @@ impl traits::NotionCaller for NotionAPI {
                 "properties":{
                     "Status":{
                         "select":{
-                            "name":"Done"
+                            "name":"Done🙌"
                         }
                     }
                 }
@@ -350,7 +350,7 @@ impl TryFrom<&Page> for TaskStatus {
         return match status_text {
             Some("To Do") => Ok(TaskStatus::Todo),
             Some("Doing") => Ok(TaskStatus::Doing),
-            Some("Done") => Ok(TaskStatus::Done),
+            Some("Done🙌") => Ok(TaskStatus::Done),
             None => bail!("status text not found in page"),
             _ => bail!("unknown status"),
         };
